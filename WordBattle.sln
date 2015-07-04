@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordBattle", "WordBattle\WordBattle\WordBattle.csproj", "{E4808550-F17B-4DAB-A904-13133EA85EC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordBattleContent", "WordBattle\WordBattleContent\WordBattleContent.contentproj", "{806018AB-4A0D-4B4E-8597-62E764D77629}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordBattleCore", "WordBattleCore\WordBattleCore.csproj", "{9C2F1DD5-6C82-4D75-BFDA-5AB1CC88AF9E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E4808550-F17B-4DAB-A904-13133EA85EC5}.Debug|x86.ActiveCfg = Debug|x86
+		{E4808550-F17B-4DAB-A904-13133EA85EC5}.Debug|x86.Build.0 = Debug|x86
+		{E4808550-F17B-4DAB-A904-13133EA85EC5}.Release|x86.ActiveCfg = Release|x86
+		{E4808550-F17B-4DAB-A904-13133EA85EC5}.Release|x86.Build.0 = Release|x86
+		{806018AB-4A0D-4B4E-8597-62E764D77629}.Debug|x86.ActiveCfg = Debug|x86
+		{806018AB-4A0D-4B4E-8597-62E764D77629}.Release|x86.ActiveCfg = Release|x86
+		{9C2F1DD5-6C82-4D75-BFDA-5AB1CC88AF9E}.Debug|x86.ActiveCfg = Debug|x86
+		{9C2F1DD5-6C82-4D75-BFDA-5AB1CC88AF9E}.Debug|x86.Build.0 = Debug|x86
+		{9C2F1DD5-6C82-4D75-BFDA-5AB1CC88AF9E}.Release|x86.ActiveCfg = Release|x86
+		{9C2F1DD5-6C82-4D75-BFDA-5AB1CC88AF9E}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
