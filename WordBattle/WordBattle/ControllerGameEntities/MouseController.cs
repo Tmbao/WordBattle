@@ -7,8 +7,21 @@ using Microsoft.Xna.Framework;
 
 namespace WordBattle.ControllerGameEntities
 {
-    class MouseController : ControllerGameEntity<MouseState>
+    public class MouseController : ControllerGameEntity<MouseState>
     {
+        private static MouseController mouseController;
+
+        public static MouseController GetInstance() 
+        {
+            if (mouseController == null)
+                mouseController = new MouseController();
+            return mouseController;
+        }
+
+        private MouseController() 
+        {
+        }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);

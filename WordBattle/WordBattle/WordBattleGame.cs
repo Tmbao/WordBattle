@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework.Media;
 using WordBattle.InvisibleGameEntities;
 using WordBattle.VisibleGameEntities;
 using WordBattle.Utilities;
-using WordBattleCore.DataTypes;
+using WordBattleCore.GridDataTypes;
 
 namespace WordBattle
 {
@@ -25,7 +25,6 @@ namespace WordBattle
 
         // My entities
         TilingGrid tilingGrid;
-        WordGrid wordGrid;
 
         public WordBattleGame()
         {
@@ -67,16 +66,14 @@ namespace WordBattle
             IsMouseVisible = true;
 
             // Initialize map
-            wordGrid = Global.Content.Load<WordGrid>(Utils.GetMapFileName("Default"));
 
-
-            tilingGrid = new TilingGrid(
+            tilingGrid = TilingGrid.GetInstance();
+            tilingGrid.Load(
                 Consts.GRID_LEFT, Consts.GRID_TOP, 
-                Consts.GRID_COLS, Consts.GRID_ROWS, 
                 Consts.TILE_WIDTH, Consts.TILE_HEIGHT, 
-                wordGrid.Grid());
+                Utils.GetMapFileName(Consts.MAP_NAME));
 
-            Global.GamePhase.CurrentPhase = PHASE.IN_GAME;
+            Global.CurrentPhase= Phase.IN_GAME;
         }
 
         /// <summary>
@@ -103,13 +100,13 @@ namespace WordBattle
             Global.UpdateAll(gameTime);
             tilingGrid.Update(gameTime);
 
-            // Check current phase
-            switch (Global.GamePhase.CurrentPhase)
+            // Check current Phase
+            switch (Global.CurrentPhase)
             {
-                case PHASE.IN_GAME:
+                case Phase.IN_GAME:
                     UpdateGame(gameTime);
                     break;
-                case PHASE.DRAWING:
+                case Phase.DRAWING:
                     UpdateDrawing(gameTime);
                     break;
             }

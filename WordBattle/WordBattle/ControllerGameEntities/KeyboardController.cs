@@ -9,11 +9,39 @@ namespace WordBattle.ControllerGameEntities
 {
     public class KeyboardController : ControllerGameEntity<KeyboardState>
     {
+        private static KeyboardController keyboardController;
+
+        public static KeyboardController GetInstance()
+        {
+            if (keyboardController == null)
+                keyboardController = new KeyboardController();
+            return keyboardController;
+        }
+
+        private KeyboardController()
+        {
+        }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
             
             currentState = Keyboard.GetState();
+
+            var pressedKeys = currentState.GetPressedKeys();
+            pressedKey = Keys.None;
+            foreach (var key in pressedKeys)
+            {
+                if (IsKeyPressed(key))
+                    pressedKey = key;
+            }
+        }
+
+        Keys pressedKey;
+
+        public Keys PressedKey
+        {
+            get { return pressedKey; }
         }
 
         public bool IsKeyDown(Keys key)

@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace WordBattle.InvisibleGameEntities
 {
-    class Camera : InvisibleGameEntity
+    public class Camera : InvisibleGameEntity
     {
         private Matrix world, view, projection;
 

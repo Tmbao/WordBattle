@@ -2,28 +2,50 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using WordBattle.InvisibleGameEntities;
+using WordBattleCore.GridDataTypes;
+using Microsoft.Xna.Framework.Input;
 
 namespace WordBattle.VisibleGameEntities
 {
     public class TilingGrid : VisibleGameEntity
     {
-        int gridCols, gridRows;
+        private static TilingGrid tilingGrid;
 
-        public int NumberOfRows
+        public static TilingGrid GetInstance()
         {
-            get { return gridRows; }
-            set { gridRows = value; }
+            if (tilingGrid == null)
+                tilingGrid = new TilingGrid();
+            return tilingGrid;
         }
 
-        public int NumberOfColumns
+        private TilingGrid()
         {
-            get { return gridCols; }
-            set { gridCols = value; }
         }
 
+        // Events
+
+        public abstract class NewCharacterAppearedEventArgs
+        {
+            public virtual void OnNewCharacterAppeared(int col, int row)
+            {
+            }
+        }
+
+        //
+
+        NewCharacterAppearedEventArgs newCharacterAppeared;
+
+        public NewCharacterAppearedEventArgs NewCharacterAppeared
+        {
+            get { return newCharacterAppeared; }
+            set { newCharacterAppeared = value; }
+        }
+
+        WordGrid wordGrid;
+        float[,] intensity;
 
         int tileWidth, tileHeight;
 
@@ -75,23 +97,21 @@ namespace WordBattle.VisibleGameEntities
             private set { tiles = value; }
         }
 
-        char[,] map;
-        float[,] intensity;
+        Tuple<int, int> selectedIndex;
 
-        public TilingGrid(float left, float top, int gridCols, int gridRows, int tileWidth, int tileHeight, char[,] map)
+        public void Load(float left, float top, int tileWidth, int tileHeight, String mapPath)
         {
-            // Copy parameters
+            this.wordGrid = WordGrid.GetInstance();
+            this.wordGrid.Load(Global.Content.Load<GridData>(mapPath));
+
             this.left = left;
             this.top = top;
-            this.gridCols = gridCols;
-            this.gridRows = gridRows;
             this.tileWidth = tileWidth;
             this.tileHeight = tileHeight;
-            this.mapWidth = tileWidth * gridCols;
-            this.mapHeight = this.TileHeight * gridRows;
-            this.map = map;
+            this.mapWidth = tileWidth * wordGrid.NumberOfColumns;
+            this.mapHeight = this.TileHeight * wordGrid.NumberOfRows;
 
-            intensity = new float[gridRows, gridCols];
+            intensity = new float[wordGrid.NumberOfRows, wordGrid.NumberOfColumns];
 
             // Load textures
             LoadAllTiles();
@@ -118,12 +138,15 @@ namespace WordBattle.VisibleGameEntities
         {
             base.Update(gameTime);
 
-            switch (Global.GamePhase.CurrentPhase)
+            // Update light effect 
+            UpdateIntensity(gameTime);
+
+            switch (Global.CurrentPhase)
             {
-                case PHASE.IN_GAME:
+                case Phase.IN_GAME:
                     UpdateGame(gameTime);
                     break;
-                case PHASE.DRAWING:
+                case Phase.DRAWING:
                     UpdateDrawing(gameTime);
                     break;
             }
@@ -140,18 +163,60 @@ namespace WordBattle.VisibleGameEntities
 
         private void UpdateGame(GameTime gameTime)
         {
-            // Update light effect 
+            // Update on mouse over
             Tuple<int, int> index = GridIndexOf(Global.MouseHelper.GetCurrentMousePosition());
-            UpdateIntensity(gameTime);
-
             if (index != null)
+            {
                 intensity[index.Item1, index.Item2] = Consts.INTENSITY_MAX;
+
+                if (Global.MouseHelper.IsLeftButtonPressed())
+                    selectedIndex = index;
+
+                if (!CanSelect(selectedIndex))
+                    selectedIndex = null;
+            }
+
+            // Update on keyboard pressed
+            var pressedKey = Global.KeyboardHelper.PressedKey;
+            if (pressedKey != Keys.None)
+            {
+                var pressedKeyCode = pressedKey.ToString();
+
+                // The pressed key is a character
+                if (pressedKeyCode.Length == 1 && Char.IsLetter(pressedKeyCode[0]))
+                {
+                    // Set the character at selected index
+                    if (selectedIndex != null)
+                    {
+                        wordGrid.Grid[selectedIndex.Item1, selectedIndex.Item2] = Char.ToUpper(pressedKeyCode[0]);
+
+                        // Event
+                        if (newCharacterAppeared != null)
+                        {
+                            newCharacterAppeared.OnNewCharacterAppeared(selectedIndex.Item1, selectedIndex.Item2);
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool CanSelect(Tuple<int, int> selectedIndex)
+        {
+            // Not selected yet
+            if (selectedIndex == null)
+                return false;
+            // The current index has been already filled
+            else if (wordGrid.Grid[selectedIndex.Item1, selectedIndex.Item2] != Consts.BLANK)
+                return false;
+            else
+                return true;
         }
 
         private void UpdateIntensity(GameTime gameTime)
         {
-            for (int row = 0; row < gridRows; row++)
-                for (int col = 0; col < gridCols; col++) {
+            for (int row = 0; row < wordGrid.NumberOfRows; row++)
+                for (int col = 0; col < wordGrid.NumberOfColumns; col++)
+                {
                     intensity[row, col] -= Consts.INTENSITY_DELTA;
                     if (intensity[row, col] < 0)
                         intensity[row, col] = 0;
@@ -160,6 +225,7 @@ namespace WordBattle.VisibleGameEntities
 
         private Tuple<int, int> GridIndexOf(Vector2 vector2)
         {
+            // Outside of grid
             if (vector2.X < left || vector2.Y < top)
                 return null;
             else
@@ -167,40 +233,44 @@ namespace WordBattle.VisibleGameEntities
                 int col = (int)(vector2.X - left) / tileWidth;
                 int row = (int)(vector2.Y - top) / tileHeight;
 
-                if (col >= gridCols || row >= gridRows)
+                // Outside of grid
+                if (col >= wordGrid.NumberOfColumns || row >= wordGrid.NumberOfRows)
                     return null;
                 else
                     return new Tuple<int, int>(row, col);
             }
-            throw new NotImplementedException();
         }
 
         public override void Draw(GameTime gameTime, object spriteBatch)
         {
             base.Draw(gameTime, spriteBatch);
 
-            for (int row = 0; row < gridRows; row++)
-            {
-                for (int col = 0; col < gridCols; col++)
+            for (int row = 0; row < wordGrid.NumberOfRows; row++)
+                for (int col = 0; col < wordGrid.NumberOfColumns; col++)
                 {
-                    DrawTile(gameTime, (SpriteBatch) spriteBatch, col, row);
+                    DrawTileAndEffects(gameTime, (SpriteBatch)spriteBatch, col, row);
                 }
-            }
         }
 
-        private void DrawTile(GameTime gameTime, SpriteBatch param, int col, int row)
+        private void DrawTileAndEffects(GameTime gameTime, SpriteBatch param, int col, int row)
         {
             // Position of tile
             float top = this.top + row * tileHeight;
             float left = this.left + col * tileWidth;
 
             // Draw corresponding tile
-            var tile = tiles[map[row, col]];
+            var tile = tiles[wordGrid.Grid[row, col]];
             tile.Draw(gameTime, param, left, top, 1);
 
-            // Draw light effect
-            tile = tiles[Consts.LIGHT];
-            tile.Draw(gameTime, param, left, top, intensity[row, col]);
+            // Draw light effects
+            if (Global.CurrentPhase== Phase.IN_GAME)
+            {
+                tile = tiles[Consts.LIGHT];
+                if (selectedIndex != null && selectedIndex.Item1 == row && selectedIndex.Item2 == col)
+                    tile.Draw(gameTime, param, left, top, Consts.INTENSITY_SELECTED);
+                else
+                    tile.Draw(gameTime, param, left, top, intensity[row, col]);
+            }
         }
     }
 }
