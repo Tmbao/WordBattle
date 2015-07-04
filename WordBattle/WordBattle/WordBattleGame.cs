@@ -73,8 +73,23 @@ namespace WordBattle
                 Consts.TILE_WIDTH, Consts.TILE_HEIGHT, 
                 Utils.GetMapFileName(Consts.MAP_NAME));
 
-            Global.CurrentPhase= Phase.IN_GAME;
+            Global.CurrentPhase = Phase.ACHIEVING;
+
+            Queue<Queue<Tuple<int, int>>> words = new Queue<Queue<Tuple<int, int>>>();
+            Queue<Tuple<int, int>> word = new Queue<Tuple<int, int>>();
+            word.Enqueue(new Tuple<int, int>(1, 1));
+            word.Enqueue(new Tuple<int, int>(1, 2));
+            word.Enqueue(new Tuple<int, int>(1, 3));
+            word.Enqueue(new Tuple<int, int>(1, 4));
+            word.Enqueue(new Tuple<int, int>(2, 4));
+            word.Enqueue(new Tuple<int, int>(3, 4));
+            
+            words.Enqueue(word);
+
+            tilingGrid.ShowWords(words);
         }
+
+        
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
@@ -106,7 +121,7 @@ namespace WordBattle
                 case Phase.IN_GAME:
                     UpdateGame(gameTime);
                     break;
-                case Phase.DRAWING:
+                case Phase.ACHIEVING:
                     UpdateDrawing(gameTime);
                     break;
             }
@@ -116,6 +131,7 @@ namespace WordBattle
 
         private void UpdateDrawing(GameTime gameTime)
         {
+            return;
             throw new NotImplementedException();
         }
 

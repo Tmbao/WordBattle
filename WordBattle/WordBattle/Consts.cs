@@ -26,9 +26,14 @@ namespace WordBattle
         public static readonly char BLANK = WordBattleCore.Consts.BLANK;
         public static readonly char OBSTACLE = WordBattleCore.Consts.OBSTACLE;
         public static readonly char LIGHT = WordBattleCore.Consts.LIGHT;
+        public static readonly char LIGHT_BLUE = WordBattleCore.Consts.LIGHT_BLUE;
 
         public static readonly float INTENSITY_MAX = 0.75f;
         public static readonly float INTENSITY_DELTA = 0.075f;
         public static readonly float INTENSITY_SELECTED = 1f;
+        public static readonly float INTENSITY_ACHIEVED = 6f;
+        public static readonly float INTENSITY_ACHIEVED_DELTA = 0.01f;
+
+        public static readonly int DRAWING_EFFECT_TIME = 40;
     }
 }

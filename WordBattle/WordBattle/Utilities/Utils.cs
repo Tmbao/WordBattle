@@ -22,6 +22,10 @@ namespace WordBattle.Utilities
             {
                 return @"Characters\Light";
             }
+            else if (c == Consts.LIGHT_BLUE)
+            {
+                return @"Characters\LightBlue";
+            }
             else if ('A' <= c && c <= 'Z')
             {
                 return String.Format(@"Characters\{0}", c);

@@ -10,7 +10,7 @@ namespace WordBattle.InvisibleGameEntities
         MENU,
         PRE_GAME,
         IN_GAME,
-        DRAWING,
+        ACHIEVING,
         POST_GAME
     }
 }

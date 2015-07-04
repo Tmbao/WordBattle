@@ -34,6 +34,13 @@ namespace WordBattle.VisibleGameEntities
             }
         }
 
+        public abstract class NewWordAchievedEventArgs
+        {
+            public virtual void OnNewWordAchieved(string word)
+            {
+            }
+        }
+
         //
 
         NewCharacterAppearedEventArgs newCharacterAppeared;
@@ -42,6 +49,14 @@ namespace WordBattle.VisibleGameEntities
         {
             get { return newCharacterAppeared; }
             set { newCharacterAppeared = value; }
+        }
+
+        NewWordAchievedEventArgs newWordAchieved;
+
+        public NewWordAchievedEventArgs NewWordAchieved
+        {
+            get { return newWordAchieved; }
+            set { newWordAchieved = value; }
         }
 
         WordGrid wordGrid;
@@ -99,6 +114,8 @@ namespace WordBattle.VisibleGameEntities
 
         Tuple<int, int> selectedIndex;
 
+        Queue<Queue<Tuple<int, int>>> achievedWords;
+
         public void Load(float left, float top, int tileWidth, int tileHeight, String mapPath)
         {
             this.wordGrid = WordGrid.GetInstance();
@@ -122,7 +139,8 @@ namespace WordBattle.VisibleGameEntities
             tiles = new Dictionary<char, Sprite2D>();
             tiles[Consts.BLANK] = new Sprite2D(tileWidth, tileHeight, LoadTexture(Utilities.Utils.GetCharacterFileName(Consts.BLANK)));
             tiles[Consts.OBSTACLE] = new Sprite2D(tileWidth, tileHeight, LoadTexture(Utilities.Utils.GetCharacterFileName(Consts.OBSTACLE)));
-            tiles[Consts.LIGHT] = new Sprite2D(tileWidth, tileHeight, LoadTexture(Utilities.Utils.GetCharacterFileName(Consts.LIGHT))); 
+            tiles[Consts.LIGHT] = new Sprite2D(tileWidth, tileHeight, LoadTexture(Utilities.Utils.GetCharacterFileName(Consts.LIGHT)));
+            tiles[Consts.LIGHT_BLUE] = new Sprite2D(tileWidth, tileHeight, LoadTexture(Utilities.Utils.GetCharacterFileName(Consts.LIGHT_BLUE))); 
             for (char c = 'A'; c <= 'Z'; c++)
                 tiles[c] = new Sprite2D(tileWidth, tileHeight, LoadTexture(Utilities.Utils.GetCharacterFileName(c)));
         }
@@ -138,16 +156,13 @@ namespace WordBattle.VisibleGameEntities
         {
             base.Update(gameTime);
 
-            // Update light effect 
-            UpdateIntensity(gameTime);
-
             switch (Global.CurrentPhase)
             {
                 case Phase.IN_GAME:
                     UpdateGame(gameTime);
                     break;
-                case Phase.DRAWING:
-                    UpdateDrawing(gameTime);
+                case Phase.ACHIEVING:
+                    UpdateAchieving(gameTime);
                     break;
             }
 
@@ -155,14 +170,57 @@ namespace WordBattle.VisibleGameEntities
                 entry.Value.Update(gameTime);
         }
 
-        private void UpdateDrawing(GameTime gameTime)
+        int elapsedDrawingTime;
+        string drawedWord;
+
+        private void UpdateAchieving(GameTime gameTime)
         {
-            return;
-            throw new NotImplementedException();
+            // Update light effect 
+            if (UpdateIntensity(gameTime, Consts.INTENSITY_ACHIEVED_DELTA) && achievedWords.Count == 0)
+            {
+                // Finish achieving, go back go game mode
+                Global.CurrentPhase = Phase.IN_GAME;
+                UpdateGame(gameTime);
+
+                return;
+            }
+
+            if (elapsedDrawingTime >= Consts.DRAWING_EFFECT_TIME && achievedWords.Count > 0)
+            {
+                elapsedDrawingTime = 0;
+
+                // Retrieve index to update
+                var word = achievedWords.ElementAt(0);
+                var index = word.Dequeue();
+
+                drawedWord += wordGrid.Grid[index.Item1, index.Item2];
+
+                // Finish a word
+                if (word.Count == 0)
+                {
+                    achievedWords.Dequeue();
+
+                    if (newWordAchieved != null)
+                    {
+                        newWordAchieved.OnNewWordAchieved(drawedWord);
+                        drawedWord = "";
+                    }
+                }
+
+                // Update
+                intensity[index.Item1, index.Item2] = Consts.INTENSITY_MAX;
+            }
+            else
+            {
+                elapsedDrawingTime += gameTime.ElapsedGameTime.Milliseconds;
+            }
         }
 
         private void UpdateGame(GameTime gameTime)
         {
+            // Update light effect 
+            UpdateIntensity(gameTime, Consts.INTENSITY_DELTA);
+
             // Update on mouse over
             Tuple<int, int> index = GridIndexOf(Global.MouseHelper.GetCurrentMousePosition());
             if (index != null)
@@ -212,15 +270,20 @@ namespace WordBattle.VisibleGameEntities
                 return true;
         }
 
-        private void UpdateIntensity(GameTime gameTime)
+        private bool UpdateIntensity(GameTime gameTime, float delta)
         {
+            bool allZeros = true;
             for (int row = 0; row < wordGrid.NumberOfRows; row++)
                 for (int col = 0; col < wordGrid.NumberOfColumns; col++)
                 {
-                    intensity[row, col] -= Consts.INTENSITY_DELTA;
+                    intensity[row, col] -= delta;
                     if (intensity[row, col] < 0)
                         intensity[row, col] = 0;
+
+                    if (intensity[row, col] > 0)
+                        allZeros = false;
                 }
+            return allZeros;
         }
 
         private Tuple<int, int> GridIndexOf(Vector2 vector2)
@@ -263,7 +326,7 @@ namespace WordBattle.VisibleGameEntities
             tile.Draw(gameTime, param, left, top, 1);
 
             // Draw light effects
-            if (Global.CurrentPhase== Phase.IN_GAME)
+            if (Global.CurrentPhase == Phase.IN_GAME)
             {
                 tile = tiles[Consts.LIGHT];
                 if (selectedIndex != null && selectedIndex.Item1 == row && selectedIndex.Item2 == col)
@@ -271,6 +334,30 @@ namespace WordBattle.VisibleGameEntities
                 else
                     tile.Draw(gameTime, param, left, top, intensity[row, col]);
             }
+            else if (Global.CurrentPhase == Phase.ACHIEVING)
+            {
+                tile = tiles[Consts.LIGHT_BLUE];
+                tile.Draw(gameTime, param, left, top, intensity[row, col]);
+            }
+        }
+
+        public void ShowWords(Queue<Queue<Tuple<int, int>>> words)
+        {
+            achievedWords = words;
+
+            // Prepare for DRAWING PHASE
+
+            // Reset intensity
+            for (int row = 0; row < wordGrid.NumberOfRows; row++)
+                for (int col = 0; col < wordGrid.NumberOfColumns; col++)
+                    intensity[row, col] = 0;
+
+            // Update CurrentPhase
+            Global.CurrentPhase = Phase.ACHIEVING;
+
+            // 
+            elapsedDrawingTime = Consts.DRAWING_EFFECT_TIME;
+            drawedWord = "";
         }
     }
 }

@@ -9,6 +9,7 @@ namespace WordBattleCore
     {
         public static readonly char BLANK = '_';
         public static readonly char OBSTACLE = '*';
-        public static readonly char LIGHT = '@';
+        public static readonly char LIGHT = '-';
+        public static readonly char LIGHT_BLUE = '+';
     }
 }
