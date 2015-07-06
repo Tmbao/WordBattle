@@ -11,8 +11,9 @@ using Microsoft.Xna.Framework.Media;
 using WordBattle.InvisibleGameEntities;
 using WordBattle.VisibleGameEntities;
 using WordBattle.Utilities;
-using WordBattleCore.GridDataTypes;
+using WordBattleCore.GridEntities;
 using WordBattle.ControllerGameEntities;
+using WordBattleCore.Dictionary;
 
 namespace WordBattle
 {
@@ -25,6 +26,7 @@ namespace WordBattle
         SpriteBatch spriteBatch;
 
         // My entities
+        TrieDictionary dictionary;
         WordGrid gridMap;
         Sprite2D background;
         LogoPanel logoPanel;
@@ -71,9 +73,12 @@ namespace WordBattle
             IsMouseVisible = true;
 
             // Initialize map
-
             gridMap = WordGrid.GetInstance();
             gridMap.Load(Content.Load<GridData>(Utils.GetMapFileName(Consts.DEFALT_MAP_NAME)));
+
+            // Initialize dictionary
+            dictionary = TrieDictionary.GetInstance();
+            dictionary.Load(Content.Load<string[]>(Utils.GetDictionaryFileName(Consts.DEFAULT_DICTIONARY_NAME)));
 
             logoPanel = LogoPanel.GetInstance();
 
@@ -115,19 +120,41 @@ namespace WordBattle
                     switch (tilingGrid.EntityPhase)
                     {
                         case Phase.IN_GAME_MOVING_FINISHED:
-                            // Update achieving here
+                            // Show achieved words
 
-                            // Just for testing
-                            Global.CurrentPhase = Phase.IN_GAME_END_TURN;
-                            playerTurn.Update(gameTime);
+                            var index = tilingGrid.SelectedIndex;
+                            var correctedWords = gridMap.GetCorrectedWords(index);
+
+                            tilingGrid.AchieveWords(correctedWords);
 
                             break;
+                    }
+                    break;
+
+                case Phase.IN_GAME_ACHIEVING:
+                    // Add update logic here
+
+                    // Update score
+                    if (tilingGrid.LastDrawedWord.Length > 0)
+                    {
+                        playerTurn.CurrentPlayer.IncreaseScore(tilingGrid.LastDrawedWord.Length);
+
+                        // Clear last drawed word
+                        tilingGrid.LastDrawedWord = "";
+                    }
+
+                    // Finihsed presenting achieved words
+                    if (tilingGrid.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED && 
+                        playerTurn.CurrentPlayer.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED)
+                    {
+                        Global.CurrentPhase = Phase.IN_GAME_END_TURN;
+                        playerTurn.Update(gameTime);
                     }
 
                     break;
             }
             
-            // Check current Phase
+            // Check current phase
             switch (Global.CurrentPhase)
             {
                 case Phase.PRE_GAME:
@@ -136,9 +163,24 @@ namespace WordBattle
                 case Phase.IN_GAME_MOVING:
                     UpdateGameMoving(gameTime);
                     break;
+                case Phase.IN_GAME_ACHIEVING:
+                    UpdateGameAchieving(gameTime);
+                    break;
             }
 
             base.Update(gameTime);
+        }
+
+        private void UpdateGameAchieving(GameTime gameTime)
+        {
+            tilingGrid.Update(gameTime);
+            playerTurn.Update(gameTime);
+        }
+
+        private void UpdateGameMoving(GameTime gameTime)
+        {
+            playerTurn.Update(gameTime);
+            tilingGrid.Update(gameTime);
         }
 
         private void UpdatePreGame(GameTime gameTime)
@@ -168,12 +210,6 @@ namespace WordBattle
             playerTurn.NewGame(p1, p2, 0);
 
             Global.CurrentPhase = Phase.IN_GAME_MOVING;
-        }
-
-        private void UpdateGameMoving(GameTime gameTime)
-        {
-            playerTurn.Update(gameTime);
-            tilingGrid.Update(gameTime);
         }
 
         /// <summary>

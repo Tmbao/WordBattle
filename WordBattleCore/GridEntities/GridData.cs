@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WordBattleCore.GridDataTypes
+namespace WordBattleCore.GridEntities
 {
     public class GridData
     {

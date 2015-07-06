@@ -26,7 +26,6 @@ namespace WordBattle.VisibleGameEntities
         }
 
         Sprite2D backgroundSprite;
-        Sprite2D burstColorSprite;
 
         float left, top;
 
@@ -34,9 +33,6 @@ namespace WordBattle.VisibleGameEntities
 
             // Load background
             backgroundSprite = new Sprite2D(0, 0, Utils.LoadSprite(Utils.GetImageFileName("B")));
-
-            // Load text color
-            burstColorSprite = new Sprite2D(0, 0, Utils.LoadSprite(Utils.GetCharacterFileName(Consts.LIGHT_YELLOW)));
 
             // 
             left = Consts.LOGO_LEFT;

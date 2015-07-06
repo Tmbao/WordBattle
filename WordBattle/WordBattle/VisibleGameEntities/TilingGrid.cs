@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using WordBattle.InvisibleGameEntities;
 using WordBattle.Utilities;
-using WordBattleCore.GridDataTypes;
+using WordBattleCore.GridEntities;
 using Microsoft.Xna.Framework.Input;
 using WordBattle.ControllerGameEntities;
 
@@ -25,8 +25,8 @@ namespace WordBattle.VisibleGameEntities
 
         private TilingGrid()
         {
+            lastDrawedWord = "";
         }
-
 
         WordGrid wordGrid;
         float[,] intensity;
@@ -83,6 +83,12 @@ namespace WordBattle.VisibleGameEntities
 
         Tuple<int, int> selectedIndex;
 
+        public Tuple<int, int> SelectedIndex
+        {
+            get { return selectedIndex; }
+            private set { selectedIndex = value; }
+        }
+
         Queue<Queue<Tuple<int, int>>> achievingWords;
 
         public void Load(float left, float top, int tileWidth, int tileHeight)
@@ -117,6 +123,14 @@ namespace WordBattle.VisibleGameEntities
         int elapsedUpdateTime;
         string drawedWord;
 
+        string lastDrawedWord;
+
+        public string LastDrawedWord
+        {
+            get { return lastDrawedWord; }
+            set { lastDrawedWord = value; }
+        }
+
         private void UpdateAchieving(GameTime gameTime)
         {
             // Reset selectedIndex to avoid unexpected behaviours
@@ -143,6 +157,7 @@ namespace WordBattle.VisibleGameEntities
                 if (word.Count == 0)
                 {
                     achievingWords.Dequeue();
+                    lastDrawedWord = drawedWord;
                     drawedWord = "";
                 }
 
@@ -278,10 +293,10 @@ namespace WordBattle.VisibleGameEntities
 
             // Update CurrentPhase
             entityPhase = Phase.IN_GAME_ACHIEVING;
+            Global.CurrentPhase = Phase.IN_GAME_ACHIEVING;
 
             // Draw immediately
             elapsedUpdateTime = Consts.DRAWING_EFFECT_TIME;
-
             drawedWord = "";
         }
     }

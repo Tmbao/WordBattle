@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using WordBattleCore.Dictionary;
 
-namespace WordBattleCore.GridDataTypes
+namespace WordBattleCore.GridEntities
 {
     public class WordGrid
     {
@@ -18,6 +19,7 @@ namespace WordBattleCore.GridDataTypes
 
         private WordGrid()
         {
+            dictionary = TrieDictionary.GetInstance();
         }
 
         int gridCols, gridRows;
@@ -42,6 +44,9 @@ namespace WordBattleCore.GridDataTypes
             get { return grid; }
             set { grid = value; }
         }
+
+        int[] delta1 = { 0, 1, 0, -1 };
+        int[] delta2 = { -1, 0, 1, 0 };
 
         public void Load(GridData gridData)
         {
@@ -88,11 +93,9 @@ namespace WordBattleCore.GridDataTypes
             else
             {
                 // Check for adjacent 
-                int[] d1 = { 0, 1, 0, -1 };
-                int[] d2 = { -1, 0, 1, 0 };
                 for (int k = 0; k < 4; k++)
                 {
-                    Tuple<int, int> adjacentIndex = new Tuple<int, int>(selectedIndex.Item1 + d1[k], selectedIndex.Item2 + d2[k]);
+                    Tuple<int, int> adjacentIndex = new Tuple<int, int>(selectedIndex.Item1 + delta1[k], selectedIndex.Item2 + delta2[k]);
                     if (IsInside(adjacentIndex) && Char.IsLetter(grid[adjacentIndex.Item1, adjacentIndex.Item2]))
                         return true;
                 }
@@ -103,6 +106,38 @@ namespace WordBattleCore.GridDataTypes
         private bool IsInside(Tuple<int, int> index)
         {
             return 0 <= index.Item1 && index.Item1 < gridRows && 0 <= index.Item2 && index.Item2 < gridCols;
+        }
+
+        TrieDictionary dictionary;
+        Queue<Queue<Tuple<int, int>>> correctedWords;
+        Stack<Tuple<int, int>> correctedWord;
+
+        private void Travel(Tuple<int, int> index, TrieDictionary.TrieNode node)
+        {
+            if (node == null)
+                return;
+
+            correctedWord.Push(index);
+
+            if (node.Word.Length > 0)
+                correctedWords.Enqueue(new Queue<Tuple<int, int>>(correctedWord.ToList()));
+
+            for (int k = 0; k < 4; k++)
+            {
+                Tuple<int, int> adjacentIndex = new Tuple<int, int>(index.Item1 + delta1[k], index.Item2 + delta2[k]);
+                if (IsInside(adjacentIndex) && Char.IsLetter(grid[adjacentIndex.Item1, adjacentIndex.Item2]))
+                    Travel(adjacentIndex, node.ChildAt(grid[adjacentIndex.Item1, adjacentIndex.Item2]));
+            }
+        }
+
+        public Queue<Queue<Tuple<int, int>>> GetCorrectedWords(Tuple<int, int> index)
+        {
+            correctedWords = new Queue<Queue<Tuple<int, int>>>();
+            correctedWord = new Stack<Tuple<int, int>>();
+
+            Travel(index, dictionary.RootTree.ChildAt(grid[index.Item1, index.Item2]));
+
+            return correctedWords;
         }
     }
 }

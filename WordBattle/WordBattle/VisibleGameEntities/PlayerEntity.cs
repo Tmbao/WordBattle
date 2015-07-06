@@ -74,6 +74,8 @@ namespace WordBattle.VisibleGameEntities
             this.height = height;
             this.increasingScore = 0;
 
+            this.entityPhase = Phase.IN_GAME_ACHIEVING_FINISHED;
+
             this.playerRecord = new PlayerRecord();
             this.playerRecord.PlayerName = playerName;
             this.playerRecord.PlayerScore = 0;
@@ -164,6 +166,21 @@ namespace WordBattle.VisibleGameEntities
                     top + Consts.PANEL_COMPONENT_SPACING,
                     1,
                     (float) Consts.PLAYER_FONT_SIZE / Consts.TILE_WIDTH);
+            }
+        }
+
+        public void DrawHighlightName(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            var tiles = AllTileSprites.GetInstance();
+
+            float shift = (width - Utils.GetTextWidth(playerRecord.PlayerName, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
+            for (int index = 0; index < playerRecord.PlayerName.Length; index++)
+            {
+                tiles.GetTileSprite(Consts.LIGHT).Draw(gameTime, spriteBatch,
+                    left + shift + index * Consts.PLAYER_FONT_SIZE + index * Consts.PLAYER_TEXT_SPACING,
+                    top + Consts.PANEL_COMPONENT_SPACING,
+                    Consts.INTENSITY_PLAYER_TURN,
+                    (float)Consts.PLAYER_FONT_SIZE / Consts.TILE_WIDTH);
             }
         }
     }

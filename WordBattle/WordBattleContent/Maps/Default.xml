@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <XnaContent>
   <!-- TODO: replace this Asset with your own XML asset data. -->
-  <Asset Type="WordBattleCore.GridDataTypes.GridData">
+  <Asset Type="WordBattleCore.GridEntities.GridData">
     <NumberOfRows>8</NumberOfRows>
     <NumberOfColumns>8</NumberOfColumns>
     <Obstacle></Obstacle>

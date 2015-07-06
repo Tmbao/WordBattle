@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
-using WordBattleCore.GridDataTypes;
+using WordBattleCore.GridEntities;
 
 namespace WordBattle.Utilities
 {
@@ -33,10 +33,6 @@ namespace WordBattle.Utilities
             {
                 return @"Characters\LightBlue";
             }
-            else if (c == Consts.LIGHT_YELLOW)
-            {
-                return @"Characters\LightYellow";
-            }
             else if (Char.IsLetter(c) || Char.IsDigit(c))
             {
                 return String.Format(@"Characters\{0}", c);
@@ -60,6 +56,11 @@ namespace WordBattle.Utilities
         public static string GetImageFileName(string fileName)
         {
             return @"Images\" + fileName;
+        }
+
+        public static string GetDictionaryFileName(string fileName)
+        {
+            return @"Dictionaries\" + fileName;
         }
 
         public static List<Texture2D> LoadSprite(string path)

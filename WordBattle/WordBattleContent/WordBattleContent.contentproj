@@ -213,8 +213,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Dictionaries\EnglishDictionary.xml">
-      <Name>EnglishDictionary</Name>
+    <Compile Include="Dictionaries\English.xml">
+      <Name>English</Name>
       <Importer>XmlImporter</Importer>
       <Processor>PassThroughProcessor</Processor>
     </Compile>
@@ -274,13 +274,6 @@
   <ItemGroup>
     <Compile Include="Images\Words.png">
       <Name>Words</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Characters\LightYellow.png">
-      <Name>LightYellow</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

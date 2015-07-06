@@ -38,7 +38,7 @@ namespace WordBattle.VisibleGameEntities
         public PlayerEntity CurrentPlayer
         {
             get { return players[turn]; }
-            set { players[turn] = value; }
+            private set { players[turn] = value; }
         }
 
         public override void Update(GameTime gameTime)
@@ -54,7 +54,7 @@ namespace WordBattle.VisibleGameEntities
             }
 
             players[0].Update(gameTime);
-            // players[1].Update(gameTime);
+            players[1].Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -63,6 +63,7 @@ namespace WordBattle.VisibleGameEntities
         {
             players[0].Draw(gameTime, spriteBatch);
             players[1].Draw(gameTime, spriteBatch);
+            CurrentPlayer.DrawHighlightName(gameTime, spriteBatch);
         }
     }
 }
