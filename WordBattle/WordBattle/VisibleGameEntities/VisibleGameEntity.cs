@@ -12,9 +12,5 @@ namespace WordBattle.VisibleGameEntities
         {
             base.Update(gameTime);
         }
-
-        public virtual void Draw(GameTime gameTime, object param)
-        {
-        }
     }
 }

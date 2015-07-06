@@ -18,6 +18,7 @@
     <XnaOutputType>Game</XnaOutputType>
     <ApplicationIcon>Resources\Game.ico</ApplicationIcon>
     <Thumbnail>Resources\GameThumbnail.png</Thumbnail>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -30,7 +31,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -107,14 +107,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ControllerGameEntities\ControllerGameEntity.cs" />
+    <Compile Include="ControllerGameEntities\ControllerEntity.cs" />
     <Compile Include="ControllerGameEntities\KeyboardController.cs" />
     <Compile Include="ControllerGameEntities\MouseController.cs" />
+    <Compile Include="ControllerGameEntities\GameController.cs" />
+    <Compile Include="ControllerGameEntities\PlayerGameController.cs" />
     <Compile Include="GameEntity.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="InvisibleGameEntities\Camera.cs" />
+    <Compile Include="VisibleGameEntities\PlayerTurn.cs" />
     <Compile Include="InvisibleGameEntities\Phase.cs" />
     <Compile Include="InvisibleGameEntities\InvisibleGameEntity.cs" />
+    <Compile Include="VisibleGameEntities\AllTileSprites.cs" />
+    <Compile Include="VisibleGameEntities\LogoPanel.cs" />
+    <Compile Include="VisibleGameEntities\PlayerEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Consts.cs" />

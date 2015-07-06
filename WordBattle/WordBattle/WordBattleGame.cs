@@ -12,6 +12,7 @@ using WordBattle.InvisibleGameEntities;
 using WordBattle.VisibleGameEntities;
 using WordBattle.Utilities;
 using WordBattleCore.GridDataTypes;
+using WordBattle.ControllerGameEntities;
 
 namespace WordBattle
 {
@@ -24,7 +25,11 @@ namespace WordBattle
         SpriteBatch spriteBatch;
 
         // My entities
+        WordGrid gridMap;
+        Sprite2D background;
+        LogoPanel logoPanel;
         TilingGrid tilingGrid;
+        PlayerTurn playerTurn;
 
         public WordBattleGame()
         {
@@ -67,26 +72,15 @@ namespace WordBattle
 
             // Initialize map
 
-            tilingGrid = TilingGrid.GetInstance();
-            tilingGrid.Load(
-                Consts.GRID_LEFT, Consts.GRID_TOP, 
-                Consts.TILE_WIDTH, Consts.TILE_HEIGHT, 
-                Utils.GetMapFileName(Consts.MAP_NAME));
+            gridMap = WordGrid.GetInstance();
+            gridMap.Load(Content.Load<GridData>(Utils.GetMapFileName(Consts.DEFALT_MAP_NAME)));
 
-            Global.CurrentPhase = Phase.ACHIEVING;
+            logoPanel = LogoPanel.GetInstance();
 
-            Queue<Queue<Tuple<int, int>>> words = new Queue<Queue<Tuple<int, int>>>();
-            Queue<Tuple<int, int>> word = new Queue<Tuple<int, int>>();
-            word.Enqueue(new Tuple<int, int>(1, 1));
-            word.Enqueue(new Tuple<int, int>(1, 2));
-            word.Enqueue(new Tuple<int, int>(1, 3));
-            word.Enqueue(new Tuple<int, int>(1, 4));
-            word.Enqueue(new Tuple<int, int>(2, 4));
-            word.Enqueue(new Tuple<int, int>(3, 4));
-            
-            words.Enqueue(word);
+            background = new Sprite2D(0, 0, Utils.LoadSprite(Utils.GetImageFileName("Background")));
 
-            tilingGrid.ShowWords(words);
+            // Just for testing
+            Global.CurrentPhase = Phase.PRE_GAME;
         }
 
         
@@ -113,32 +107,73 @@ namespace WordBattle
 
             // TODO: Add your update logic here
             Global.UpdateAll(gameTime);
-            tilingGrid.Update(gameTime);
 
+            // Check and switch into new phase
+            switch (Global.CurrentPhase)
+            {
+                case Phase.IN_GAME_MOVING:
+                    switch (tilingGrid.EntityPhase)
+                    {
+                        case Phase.IN_GAME_MOVING_FINISHED:
+                            // Update achieving here
+
+                            // Just for testing
+                            Global.CurrentPhase = Phase.IN_GAME_END_TURN;
+                            playerTurn.Update(gameTime);
+
+                            break;
+                    }
+
+                    break;
+            }
+            
             // Check current Phase
             switch (Global.CurrentPhase)
             {
-                case Phase.IN_GAME:
-                    UpdateGame(gameTime);
+                case Phase.PRE_GAME:
+                    UpdatePreGame(gameTime);
                     break;
-                case Phase.ACHIEVING:
-                    UpdateDrawing(gameTime);
+                case Phase.IN_GAME_MOVING:
+                    UpdateGameMoving(gameTime);
                     break;
             }
 
             base.Update(gameTime);
         }
 
-        private void UpdateDrawing(GameTime gameTime)
+        private void UpdatePreGame(GameTime gameTime)
         {
-            return;
-            throw new NotImplementedException();
+
+            gridMap.IntializeNewMap();
+
+            tilingGrid = TilingGrid.GetInstance();
+            tilingGrid.Load(
+                Consts.GRID_LEFT, Consts.GRID_TOP,
+                Consts.TILE_WIDTH, Consts.TILE_HEIGHT);
+
+            // Just for testing
+            var p1 = new PlayerEntity(
+                Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
+                Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
+                "PLAYER1");
+            p1.PlayerController = PlayerGameController.GetInstance();
+
+            var p2 = new PlayerEntity(
+                Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
+                Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
+                "PLAYER2");
+            p2.PlayerController = PlayerGameController.GetInstance();
+
+            playerTurn = PlayerTurn.GetInstance();
+            playerTurn.NewGame(p1, p2, 0);
+
+            Global.CurrentPhase = Phase.IN_GAME_MOVING;
         }
 
-        private void UpdateGame(GameTime gameTime)
+        private void UpdateGameMoving(GameTime gameTime)
         {
-            return;
-            throw new NotImplementedException();
+            playerTurn.Update(gameTime);
+            tilingGrid.Update(gameTime);
         }
 
         /// <summary>
@@ -152,21 +187,22 @@ namespace WordBattle
             // TODO: Add your drawing code here
             spriteBatch.Begin(
                 SpriteSortMode.BackToFront,
+                // BlendState.AlphaBlend,
                 Utilities.PSBlendState.Multiply,
                 null,
                 DepthStencilState.None,
                 RasterizerState.CullNone,
                 null,
                 Global.MainCamera.WVP);
+
+            background.Draw(gameTime, spriteBatch);
+            logoPanel.Draw(gameTime, spriteBatch);
+            playerTurn.Draw(gameTime, spriteBatch);
             tilingGrid.Draw(gameTime, spriteBatch);
+
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
-    }
-
-    class Temp : BlendState
-    {
-
     }
 }

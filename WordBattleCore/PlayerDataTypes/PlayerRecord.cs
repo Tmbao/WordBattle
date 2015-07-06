@@ -5,14 +5,18 @@ using System.Text;
 
 namespace WordBattleCore.PlayerDataTypes
 {
-    class Player
+    public class PlayerRecord
     {
         string playerName;
 
         public string PlayerName
         {
             get { return playerName; }
-            set { playerName = value; }
+            set { 
+                playerName = value.ToUpper();
+                if (playerName.Length > Consts.MAX_NAME_LENGTH)
+                    playerName = playerName.Substring(0, Consts.MAX_NAME_LENGTH);
+            }
         }
 
         int playerScore;

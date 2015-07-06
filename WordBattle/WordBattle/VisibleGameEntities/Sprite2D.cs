@@ -47,9 +47,9 @@ namespace WordBattle.VisibleGameEntities
             
             // Default values
             if (width == 0)
-                width = textures[0].Width;
+                this.width = textures[0].Width;
             if (height == 0)
-                height = textures[0].Height;
+                this.height = textures[0].Height;
 
             this.currentTexture = 0;
         }
@@ -61,9 +61,7 @@ namespace WordBattle.VisibleGameEntities
             base.Update(gameTime);
         }
 
-        // For drawing 
-
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, float left, float top, float intensity)
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, float left, float top, float intensity, float scale)
         {
             spriteBatch.Draw(textures[currentTexture],
                     new Vector2(left, top), // position
@@ -71,11 +69,24 @@ namespace WordBattle.VisibleGameEntities
                     Color.White * intensity, // color
                     0, // rotation
                     Vector2.Zero, // origin
-                    1, // scale
+                    scale, // scale
                     SpriteEffects.None, // effects
                     1); // layer depth
+        }
 
-            base.Draw(gameTime, spriteBatch);
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, float left, float top, float intensity)
+        {
+            Draw(gameTime, spriteBatch, left, top, intensity, 1);
+        }
+
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, float left, float top)
+        {
+            Draw(gameTime, spriteBatch, left, top, 1, 1);
+        }
+
+        internal void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            Draw(gameTime, spriteBatch, 0, 0, 1, 1);
         }
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace WordBattle.ControllerGameEntities
 {
-    public class MouseController : ControllerGameEntity<MouseState>
+    public class MouseController : ControllerEntity<MouseState>
     {
         private static MouseController mouseController;
 
@@ -24,8 +24,13 @@ namespace WordBattle.ControllerGameEntities
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
+            // The mouse has been already updated
+            if (lastUpdate == gameTime.TotalGameTime.Milliseconds)
+                return;
 
+            lastUpdate = gameTime.TotalGameTime.Milliseconds;
+
+            base.Update(gameTime);
             currentState = Mouse.GetState();
         }
 

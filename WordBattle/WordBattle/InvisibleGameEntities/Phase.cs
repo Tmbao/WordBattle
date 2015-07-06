@@ -7,10 +7,11 @@ namespace WordBattle.InvisibleGameEntities
 {
     public enum Phase
     {
-        MENU,
+        IN_GAME_MOVING,
+        IN_GAME_ACHIEVING,
+        IN_GAME_ACHIEVING_FINISHED,
+        IN_GAME_END_TURN,
         PRE_GAME,
-        IN_GAME,
-        ACHIEVING,
-        POST_GAME
+        IN_GAME_MOVING_FINISHED,
     }
 }

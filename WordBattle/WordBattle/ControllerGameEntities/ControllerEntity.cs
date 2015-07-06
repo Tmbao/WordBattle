@@ -6,15 +6,15 @@ using Microsoft.Xna.Framework;
 
 namespace WordBattle.ControllerGameEntities
 {
-    public abstract class ControllerGameEntity<T> : GameEntity
+    public abstract class ControllerEntity<T> : GameEntity
     {
         protected T currentState;
         protected T previousState;
+        protected int lastUpdate;
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-
             previousState = currentState;
         }
     }

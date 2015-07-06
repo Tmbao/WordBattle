@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace WordBattle.ControllerGameEntities
 {
-    public class KeyboardController : ControllerGameEntity<KeyboardState>
+    public class KeyboardController : ControllerEntity<KeyboardState>
     {
         private static KeyboardController keyboardController;
 
@@ -24,6 +24,12 @@ namespace WordBattle.ControllerGameEntities
 
         public override void Update(GameTime gameTime)
         {
+            // The keyboard has already updated
+            if (lastUpdate == gameTime.TotalGameTime.Milliseconds)
+                return;
+
+            lastUpdate = gameTime.TotalGameTime.Milliseconds;
+
             base.Update(gameTime);
             
             currentState = Keyboard.GetState();

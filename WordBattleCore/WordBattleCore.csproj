@@ -95,7 +95,7 @@
     <Compile Include="Consts.cs" />
     <Compile Include="GridDataTypes\GridData.cs" />
     <Compile Include="GridDataTypes\WordGrid.cs" />
-    <Compile Include="PlayerDataTypes\Player.cs" />
+    <Compile Include="PlayerDataTypes\PlayerRecord.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
