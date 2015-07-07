@@ -214,7 +214,7 @@ namespace WordBattle
             var p2 = new PlayerEntity(
                 Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
                 Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
-                "RANDOMAI", "AI");
+                "COMPUTER", "AI");
             p2.PlayerController = new RandomAIPlayer();
 
             playerTurn = PlayerTurn.GetInstance();
