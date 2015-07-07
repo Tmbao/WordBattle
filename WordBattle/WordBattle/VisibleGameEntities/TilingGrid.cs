@@ -25,7 +25,7 @@ namespace WordBattle.VisibleGameEntities
 
         private TilingGrid()
         {
-            lastDrawedWord = "";
+            lastDrawnWord = "";
         }
 
         WordGrid wordGrid;
@@ -89,18 +89,20 @@ namespace WordBattle.VisibleGameEntities
             private set { selectedIndex = value; }
         }
 
+        char pressedCharacter;
+
         Queue<Queue<Tuple<int, int>>> achievingWords;
 
         int elapsedUpdateTime;
 
-        string drawedWord;
+        string drawnWord;
 
-        string lastDrawedWord;
+        string lastDrawnWord;
 
-        public string LastDrawedWord
+        public string LastDrawnWord
         {
-            get { return lastDrawedWord; }
-            set { lastDrawedWord = value; }
+            get { return lastDrawnWord; }
+            set { lastDrawnWord = value; }
         }
 
         List<Tuple<int, int>> appearOrder;
@@ -150,7 +152,7 @@ namespace WordBattle.VisibleGameEntities
                     UpdateLoading(gameTime);
                     break;
                 case Phase.IN_GAME_MOVING:
-                    UpdateGame(gameTime);
+                    UpdateMoving(gameTime);
                     break;
                 case Phase.IN_GAME_ACHIEVING:
                     UpdateAchieving(gameTime);
@@ -194,14 +196,14 @@ namespace WordBattle.VisibleGameEntities
                 var word = achievingWords.ElementAt(0);
                 var index = word.Dequeue();
 
-                drawedWord += wordGrid.Grid[index.Item1, index.Item2];
+                drawnWord += wordGrid.Grid[index.Item1, index.Item2];
 
                 // Finish a word
                 if (word.Count == 0)
                 {
                     achievingWords.Dequeue();
-                    lastDrawedWord = drawedWord;
-                    drawedWord = "";
+                    lastDrawnWord = drawnWord;
+                    drawnWord = "";
                 }
 
                 // Update
@@ -213,7 +215,7 @@ namespace WordBattle.VisibleGameEntities
             }
         }
 
-        private void UpdateGame(GameTime gameTime)
+        private void UpdateMoving(GameTime gameTime)
         {
             // Update light effect 
             UpdateIntensity(gameTime, Consts.INTENSITY_HOVER_DELTA);
@@ -228,13 +230,13 @@ namespace WordBattle.VisibleGameEntities
         private void UpdateKeyboard()
         {
             var pressedKeyCode = PlayerTurn.GetInstance().CurrentPlayer.PlayerController.PressedCharacters();
-
+            pressedCharacter = '\0';
             // The pressed key is a character
-            if (pressedKeyCode != null && pressedKeyCode.Length == 1 && Char.IsLetter(pressedKeyCode[0]))
+            if (pressedKeyCode != null && pressedKeyCode.Length == 1 && Utils.IsLetter(pressedKeyCode[0]))
             {
                 // Set the character at selected index
                 if (selectedIndex != null)
-                    wordGrid.Grid[selectedIndex.Item1, selectedIndex.Item2] = Char.ToUpper(pressedKeyCode[0]);
+                    wordGrid.Grid[selectedIndex.Item1, selectedIndex.Item2] = pressedCharacter = Char.ToUpper(pressedKeyCode[0]);
             }
         }
 
@@ -280,13 +282,12 @@ namespace WordBattle.VisibleGameEntities
                 case Phase.IN_GAME_ACHIEVING:
                     DrawAllTilesAndEffects(gameTime, spriteBatch);
                     if (IsIntensityAllZeros() == true)
-                        entityPhase = Phase.IN_GAME_ACHIEVING_FINISHED;
+                       entityPhase = Phase.IN_GAME_ACHIEVING_FINISHED;
                     break;
                 case Phase.IN_GAME_MOVING:
                     DrawAllTilesAndEffects(gameTime, spriteBatch);
                     // Player has ended turn
-                    if (selectedIndex != null &&
-                        PlayerTurn.GetInstance().CurrentPlayer.PlayerController.PressedCharacters() != null)
+                    if (selectedIndex != null && pressedCharacter != '\0')
                         entityPhase = Phase.IN_GAME_MOVING_FINISHED;
                     break;
                 case Phase.IN_GAME_ACHIEVING_FINISHED:
@@ -309,7 +310,7 @@ namespace WordBattle.VisibleGameEntities
             float top = this.top + row * tileHeight;
             float left = this.left + col * tileWidth;
 
-            var tiles = AllTileSprites.GetInstance();
+            var tiles = TileSpriteContainer.GetInstance();
 
             // Draw corresponding tile
             var tile = tiles.GetTileSprite(wordGrid.Grid[row, col]);
@@ -325,7 +326,7 @@ namespace WordBattle.VisibleGameEntities
                 // Draw light effects
                 if (entityPhase == Phase.IN_GAME_MOVING)
                 {
-                    tile = tiles.GetTileSprite(Consts.LIGHT);
+                    tile = tiles.GetTileSprite(Consts.LIGHT_BLUE);
                     if (selectedIndex != null && selectedIndex.Item1 == row && selectedIndex.Item2 == col)
                         tile.Draw(gameTime, spriteBatch, left, top, Consts.INTENSITY_SELECTED);
                     else
@@ -355,7 +356,7 @@ namespace WordBattle.VisibleGameEntities
 
             // Draw immediately
             elapsedUpdateTime = Consts.DRAWING_EFFECT_TIME;
-            drawedWord = "";
+            drawnWord = "";
         }
     }
 }

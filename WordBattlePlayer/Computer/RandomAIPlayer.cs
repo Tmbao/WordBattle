@@ -13,6 +13,13 @@ namespace WordBattlePlayer.Computer
 
         string pressedCharaceter;
 
+        Random rand;
+
+        public RandomAIPlayer()
+        {
+            rand = new Random();
+        }
+
         public override string PressedCharacters()
         {
             return pressedCharaceter;
@@ -32,11 +39,9 @@ namespace WordBattlePlayer.Computer
             for (int row = 0; row < grid.NumberOfRows; row++)
                 for (int col = 0; col < grid.NumberOfColumns; col++)
                     if (grid.CanFill(new Tuple<int,int>(row, col)))
-                    {
                         freeCells.Add(new Tuple<int, int>(row, col));
-                    }
 
-            Random rand = new Random();
+            
             selectedIndex = freeCells[rand.Next(freeCells.Count)];
             pressedCharaceter = ((char)((int)'A' + rand.Next(26))).ToString();
         }

@@ -27,6 +27,7 @@ namespace WordBattle
         SpriteBatch spriteBatch;
 
         // My entities
+        MenuContainer menuContainer;
         TrieDictionary dictionary;
         WordGrid gridMap;
         Sprite2D background;
@@ -35,10 +36,19 @@ namespace WordBattle
         PlayerTurn playerTurn;
         GameNotification notification;
 
+        MouseController mouseController;
+        KeyboardController keyboardController;
+
+        GameMode gameMode;
+
+        string p1Name, p2Name, roomName;
+
         public WordBattleGame()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = Consts.ContentDirectory;
+
+            IsFixedTimeStep = false;
 
             // Modify screen size
             graphics.PreferredBackBufferWidth = Consts.SCREEN_WIDTH;
@@ -85,14 +95,21 @@ namespace WordBattle
             // Initialize logo panel
             logoPanel = LogoPanel.GetInstance();
 
+            // Initialize menu
+            menuContainer = MenuContainer.GetInstance();
+
             // Initialize background
-            background = new Sprite2D(0, 0, Utils.LoadSprite(Utils.GetImageFileName("Background")));
+            background = new Sprite2D(0, 0, Utils.LoadTextures(Utils.GetImageFileName("Background")));
 
             // Initialize notification
             notification = GameNotification.GetInstance();
 
+            // Initialize controller
+            mouseController = MouseController.GetInstance();
+            keyboardController = KeyboardController.GetInstance();
+
             // Just for testing
-            Global.CurrentPhase = Phase.NEW_GAME;
+            Global.UpdatePhase(Phase.MENU_LOADING);
         }
 
         
@@ -123,7 +140,28 @@ namespace WordBattle
             // Check and switch into new phase
             switch (Global.CurrentPhase)
             {
-                case Phase.NEW_GAME:
+                case Phase.MENU_LOADING:
+                    if (menuContainer.EnityPhase == Phase.MENU_LOADING_FINISHED)
+                        Global.UpdatePhase(Phase.MENU);
+                    break;
+                case Phase.MENU:
+                    if (menuContainer.GetSelectedMode() != GameMode.NONE)
+                    {
+                        gameMode = menuContainer.GetSelectedMode();
+                        p1Name = menuContainer.GetPlayer1Name();
+                        p2Name = menuContainer.GetPlayer2Name();
+                        roomName = menuContainer.GetRoomName();
+                        Global.UpdatePhase(Phase.MENU_SELECTED_ANIMATING);
+                    }
+                    break;
+                case Phase.MENU_SELECTED_ANIMATING:
+                    if (menuContainer.EnityPhase == Phase.MENU_SELECTED_ANIMATING_FINISHED &&
+                        logoPanel.EntityPhase == Phase.MENU_SELECTED_ANIMATING_FINISHED)
+                    {
+                        CreateNewGame();
+                        notification.PushMessage("READY");
+                        Global.UpdatePhase(Phase.IN_GAME_LOADING);
+                    }
                     break;
                 case Phase.IN_GAME_LOADING:
                     // Add update logic here
@@ -154,13 +192,13 @@ namespace WordBattle
                     // Add update logic here
 
                     // Update score
-                    if (tilingGrid.LastDrawedWord.Length > 0)
+                    if (tilingGrid.LastDrawnWord.Length > 0)
                     {
-                        playerTurn.CurrentPlayer.IncreaseScore(tilingGrid.LastDrawedWord.Length);
-                        notification.PushMessage(tilingGrid.LastDrawedWord);
+                        playerTurn.CurrentPlayer.IncreaseScore(tilingGrid.LastDrawnWord.Length);
+                        notification.PushMessage(tilingGrid.LastDrawnWord);
 
-                        // Clear last drawed word
-                        tilingGrid.LastDrawedWord = "";
+                        // Clear last drawn word
+                        tilingGrid.LastDrawnWord = "";
                     }
 
                     // Finished presenting achieved words
@@ -174,12 +212,17 @@ namespace WordBattle
 
                     break;
             }
+
+            keyboardController.Update(gameTime);
+            mouseController.Update(gameTime);
             
             // Check current phase
             switch (Global.CurrentPhase)
             {
-                case Phase.NEW_GAME:
-                    UpdateNewGame(gameTime);
+                case Phase.MENU_LOADING:
+                case Phase.MENU:
+                case Phase.MENU_SELECTED_ANIMATING:
+                    UpdateMenu(gameTime);
                     break;
                 case Phase.IN_GAME_LOADING:
                     UpdateGameLoading(gameTime);
@@ -195,7 +238,15 @@ namespace WordBattle
             base.Update(gameTime);
         }
 
-        private void UpdateNewGame(GameTime gameTime)
+        private void UpdateMenu(GameTime gameTime)
+        {
+            menuContainer.Update(gameTime);
+            logoPanel.Update(gameTime);
+        }
+
+        Vector3 logoTranslation;
+
+        private void CreateNewGame()
         {
             gridMap.IntializeNewMap();
 
@@ -208,20 +259,35 @@ namespace WordBattle
             var p1 = new PlayerEntity(
                 Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
                 Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
-                "TMBAO", "Human");
+                p1Name, "Single");
             p1.PlayerController = PlayerGameController.GetInstance();
 
-            var p2 = new PlayerEntity(
-                Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
-                Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
-                "COMPUTER", "AI");
-            p2.PlayerController = new RandomAIPlayer();
+            PlayerEntity p2;
+
+            switch (gameMode)
+            {
+                case GameMode.SINGLE:
+                    p2 = new PlayerEntity(
+                        Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP, 
+                        Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT, 
+                        "COMPUTER", "AI");
+                    p2.PlayerController = new RandomAIPlayer();
+                    break;
+
+                case GameMode.MULTI:
+                case GameMode.NETWORK:
+                default:
+                    // Online mode is under construction
+                    p2 = new PlayerEntity(
+                        Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
+                        Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
+                        p2Name, "Single");
+
+                    break;
+            }
 
             playerTurn = PlayerTurn.GetInstance();
             playerTurn.NewGame(p1, p2, 0);
-
-            Global.UpdatePhase(Phase.IN_GAME_LOADING);
-            notification.PushMessage("READY");
         }
 
         private void UpdateGameLoading(GameTime gameTime)
@@ -254,7 +320,6 @@ namespace WordBattle
         {
             GraphicsDevice.Clear(Color.White);
 
-            // TODO: Add your drawing code here
             spriteBatch.Begin(
                 SpriteSortMode.BackToFront,
                 //BlendState.AlphaBlend,
@@ -265,11 +330,25 @@ namespace WordBattle
                 null,
                 Global.MainCamera.WVP);
 
-            background.Draw(gameTime, spriteBatch);
-            logoPanel.Draw(gameTime, spriteBatch);
-            playerTurn.Draw(gameTime, spriteBatch);
-            tilingGrid.Draw(gameTime, spriteBatch);
-            notification.Draw(gameTime, spriteBatch);
+            switch (Global.CurrentPhase)
+            {
+                case Phase.MENU_LOADING:
+                case Phase.MENU:
+                case Phase.MENU_SELECTED_ANIMATING:
+                    logoPanel.Draw(gameTime, spriteBatch);
+                    background.Draw(gameTime, spriteBatch);
+                    menuContainer.Draw(gameTime, spriteBatch);
+                    break;
+                case Phase.IN_GAME_LOADING:
+                case Phase.IN_GAME_MOVING:
+                case Phase.IN_GAME_ACHIEVING:
+                    logoPanel.Draw(gameTime, spriteBatch);
+                    background.Draw(gameTime, spriteBatch);
+                    playerTurn.Draw(gameTime, spriteBatch);
+                    tilingGrid.Draw(gameTime, spriteBatch);
+                    notification.Draw(gameTime, spriteBatch);
+                    break;
+            }
 
             spriteBatch.End();
 

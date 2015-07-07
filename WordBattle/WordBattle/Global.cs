@@ -27,6 +27,8 @@ namespace WordBattle
             GameNotification.GetInstance().EntityPhase = phase;
             PlayerTurn.GetInstance().UpdatePhase(phase);
             TilingGrid.GetInstance().EntityPhase = phase;
+            MenuContainer.GetInstance().UpdatePhase(phase);
+            LogoPanel.GetInstance().EntityPhase = phase;
         }
     }
 }

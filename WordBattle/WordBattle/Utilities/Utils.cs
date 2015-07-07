@@ -33,7 +33,7 @@ namespace WordBattle.Utilities
             {
                 return @"Characters\LightBlue";
             }
-            else if (Char.IsLetter(c) || Char.IsDigit(c))
+            else if (Utils.IsLetter(c) || Char.IsDigit(c))
             {
                 return String.Format(@"Characters\{0}", c);
             }
@@ -63,7 +63,7 @@ namespace WordBattle.Utilities
             return @"Dictionaries\" + fileName;
         }
 
-        public static List<Texture2D> LoadSprite(string path)
+        public static List<Texture2D> LoadTextures(string path)
         {
             var result = new List<Texture2D>();
             result.Add(Global.Content.Load<Texture2D>(path));
@@ -93,6 +93,38 @@ namespace WordBattle.Utilities
             }
         }
 
+        public static bool IsLetter(char c)
+        {
+            c = Char.ToUpper(c);
+            return 'A' <= c && c <= 'Z';
+        }
+
+        public static bool IsLetter(string s)
+        {
+            return s.Length == 1 && IsLetter(s[0]);
+        }
+
+        public static bool IsDigit(char c)
+        {
+            return Char.IsDigit(c);
+        }
+
+        public static bool IsDigit(string s)
+        {
+            return IsDigit(s[s.Length - 1]);
+        }
+
+        public static int GetTextboxWidth()
+        {
+            return Consts.TEXTBOX_TEXT_WIDTH * Consts.TEXTBOX_TITLE_LENGTH + (Consts.TEXTBOX_TITLE_LENGTH - 1) * Consts.TEXT_SPACING + Consts.COMPONENT_SPACING +
+                Consts.MAX_NAME_LENGTH * Consts.TEXTBOX_TEXT_WIDTH + (Consts.MAX_NAME_LENGTH - 1) * Consts.TEXT_SPACING;
+        }
+
+        public static float GetMenuOptionWidth(string text)
+        {
+            return 2 * (Consts.MENU_FONT_SIZE + Consts.COMPONENT_SPACING) + text.Length * Consts.MENU_FONT_SIZE + (text.Length - 1) * Consts.TEXT_SPACING;
+        }
+
         internal static string GetImageFileName(char c)
         {
             c = Char.ToUpper(c);
@@ -116,7 +148,7 @@ namespace WordBattle.Utilities
             {
                 return @"Images\LightBlue";
             }
-            else if (Char.IsLetter(c) || Char.IsDigit(c))
+            else if (Utils.IsLetter(c) || Char.IsDigit(c))
             {
                 return String.Format(@"Images\{0}", c);
             }

@@ -114,11 +114,14 @@
     <Compile Include="GameEntity.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="InvisibleGameEntities\Camera.cs" />
+    <Compile Include="InvisibleGameEntities\GameMode.cs" />
     <Compile Include="VisibleGameEntities\GameNotification.cs" />
+    <Compile Include="VisibleGameEntities\MenuContainer.cs" />
+    <Compile Include="VisibleGameEntities\MenuOption.cs" />
     <Compile Include="VisibleGameEntities\PlayerTurn.cs" />
     <Compile Include="InvisibleGameEntities\Phase.cs" />
     <Compile Include="InvisibleGameEntities\InvisibleGameEntity.cs" />
-    <Compile Include="VisibleGameEntities\AllTileSprites.cs" />
+    <Compile Include="VisibleGameEntities\TileSpriteContainer.cs" />
     <Compile Include="VisibleGameEntities\LogoPanel.cs" />
     <Compile Include="VisibleGameEntities\PlayerEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -127,6 +130,7 @@
     <Compile Include="Utilities\PSBlendState.cs" />
     <Compile Include="Utilities\Utils.cs" />
     <Compile Include="VisibleGameEntities\Sprite2D.cs" />
+    <Compile Include="VisibleGameEntities\TileTextBox.cs" />
     <Compile Include="VisibleGameEntities\VisibleGameEntity.cs" />
     <Compile Include="VisibleGameEntities\TilingGrid.cs" />
     <Compile Include="WordBattleGame.cs" />

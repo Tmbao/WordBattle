@@ -40,7 +40,7 @@ namespace WordBattle.ControllerGameEntities
 
         private void UpdateSelectedIndex()
         {
-            var currentPosition = mouseController.GetCurrentMousePosition();
+            var currentPosition = Vector2.Transform(mouseController.GetCurrentMousePosition(), Global.MainCamera.InvertWVP);
             if (mouseController.IsLeftButtonPressed())
                 selectedIndex = Utils.GetIndexOfMouse(currentPosition);
         }

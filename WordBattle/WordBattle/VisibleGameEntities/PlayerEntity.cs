@@ -85,8 +85,8 @@ namespace WordBattle.VisibleGameEntities
             this.playerRecord.PlayerName = playerName;
             this.playerRecord.PlayerScore = 0;
 
-            this.playerImage = new Sprite2D(0, 0, Utils.LoadSprite(Utils.GetImageFileName(playerImage)));
-            this.playerImageHighlighter = new Sprite2D(0, 0, Utils.LoadSprite(Utils.GetImageFileName(Consts.LIGHT)));
+            this.playerImage = new Sprite2D(0, 0, Utils.LoadTextures(Utils.GetImageFileName(playerImage)));
+            this.playerImageHighlighter = new Sprite2D(0, 0, Utils.LoadTextures(Utils.GetImageFileName(Consts.LIGHT)));
 
             intensity = new float[Consts.MAX_NAME_LENGTH];
             appearOrder = new List<int>();
@@ -131,7 +131,9 @@ namespace WordBattle.VisibleGameEntities
                 case Phase.IN_GAME_MOVING:
                     playerController.Update(gameTime);
                     break;
-            }            
+            }
+            playerImage.Update(gameTime);
+            playerImageHighlighter.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -230,7 +232,7 @@ namespace WordBattle.VisibleGameEntities
 
         private void DrawLoadingPlayerScore(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var tiles = AllTileSprites.GetInstance();
+            var tiles = TileSpriteContainer.GetInstance();
 
             string score = playerRecord.PlayerScore.ToString();
             while (score.Length < Consts.MAX_SCORE_DIGIT)
@@ -248,7 +250,7 @@ namespace WordBattle.VisibleGameEntities
 
         private void DrawLoadingPlayerName(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var tiles = AllTileSprites.GetInstance();
+            var tiles = TileSpriteContainer.GetInstance();
 
             // Show in the center
             // float shift = (width - Utils.GetTextWidth(playerRecord.PlayerName, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
@@ -262,7 +264,7 @@ namespace WordBattle.VisibleGameEntities
 
         private void DrawPlayerImage(GameTime gameTime, SpriteBatch spriteBatch, float intensity)
         {
-            playerImage.Draw(gameTime, spriteBatch, left, top, intensity, (float) Consts.PLAYER_IMAGE_WIDTH / playerImage.Width);
+            playerImage.Draw(gameTime, spriteBatch, left, top, intensity, (float)Consts.PLAYER_IMAGE_WIDTH / playerImage.Width);
         }
 
         private void DrawPlayerImage(GameTime gameTime, SpriteBatch spriteBatch)
@@ -272,7 +274,7 @@ namespace WordBattle.VisibleGameEntities
 
         private void DrawPlayerScore(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var tiles = AllTileSprites.GetInstance();
+            var tiles = TileSpriteContainer.GetInstance();
 
             string score = playerRecord.PlayerScore.ToString();
             while (score.Length < Consts.MAX_SCORE_DIGIT)
@@ -290,7 +292,7 @@ namespace WordBattle.VisibleGameEntities
 
         private void DrawPlayerName(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var tiles = AllTileSprites.GetInstance();
+            var tiles = TileSpriteContainer.GetInstance();
 
             // Show in the center
             // float shift = (width - Utils.GetTextWidth(playerRecord.PlayerName, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;

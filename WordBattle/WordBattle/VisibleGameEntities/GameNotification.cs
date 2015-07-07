@@ -65,7 +65,7 @@ namespace WordBattle.VisibleGameEntities
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var tiles = AllTileSprites.GetInstance();
+            var tiles = TileSpriteContainer.GetInstance();
             float top = Consts.NOTIFICATION_TOP;
             for (int index = messages.Count - 1; index >= 0; index--)
             {
