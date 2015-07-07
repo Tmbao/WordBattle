@@ -41,6 +41,10 @@ namespace WordBattle
 
         GameMode gameMode;
 
+        CustomCusor cursor;
+
+        TileButton backButton, soundButton;
+
         string p1Name, p2Name, roomName;
 
         public WordBattleGame()
@@ -82,7 +86,8 @@ namespace WordBattle
             Global.Content = Content;
 
             // Allow mouse
-            IsMouseVisible = true;
+            //IsMouseVisible = true;
+            cursor = CustomCusor.GetInstance();
 
             // Initialize map
             gridMap = WordGrid.GetInstance();
@@ -107,6 +112,10 @@ namespace WordBattle
             // Initialize controller
             mouseController = MouseController.GetInstance();
             keyboardController = KeyboardController.GetInstance();
+
+            // Initialize button
+            backButton = new TileButton(25, 620, Utils.GetImageFileName("Back"));
+            soundButton = new TileButton(70, 620, Utils.GetImageFileName("Sound"));
 
             // Just for testing
             Global.UpdatePhase(Phase.MENU_LOADING);
@@ -141,80 +150,31 @@ namespace WordBattle
             switch (Global.CurrentPhase)
             {
                 case Phase.MENU_LOADING:
-                    if (menuContainer.EnityPhase == Phase.MENU_LOADING_FINISHED)
-                        Global.UpdatePhase(Phase.MENU);
+                    CheckMenuLoading();
                     break;
                 case Phase.MENU:
-                    if (menuContainer.GetSelectedMode() != GameMode.NONE)
-                    {
-                        gameMode = menuContainer.GetSelectedMode();
-                        p1Name = menuContainer.GetPlayer1Name();
-                        p2Name = menuContainer.GetPlayer2Name();
-                        roomName = menuContainer.GetRoomName();
-                        Global.UpdatePhase(Phase.MENU_SELECTED_ANIMATING);
-                    }
+                    CheckMenu();
                     break;
                 case Phase.MENU_SELECTED_ANIMATING:
-                    if (menuContainer.EnityPhase == Phase.MENU_SELECTED_ANIMATING_FINISHED &&
-                        logoPanel.EntityPhase == Phase.MENU_SELECTED_ANIMATING_FINISHED)
-                    {
-                        CreateNewGame();
-                        notification.PushMessage("READY");
-                        Global.UpdatePhase(Phase.IN_GAME_LOADING);
-                    }
+                    CheckMenuSelectedAnimating();
                     break;
                 case Phase.IN_GAME_LOADING:
-                    // Add update logic here
-
-                    // Finished loading 
-                    if (tilingGrid.EntityPhase == Phase.IN_GAME_LOADING_FINISHED)
-                    {
-                        notification.PushMessage("GO");
-                        Global.UpdatePhase(Phase.IN_GAME_MOVING);
-                    }
+                    CheckGameLoading();
                     break;
                 case Phase.IN_GAME_MOVING:
-                    switch (tilingGrid.EntityPhase)
-                    {
-                        case Phase.IN_GAME_MOVING_FINISHED:
-                            // Show achieved words
-
-                            var index = tilingGrid.SelectedIndex;
-                            var correctedWords = gridMap.GetCorrectedWords(index);
-
-                            tilingGrid.AchieveWords(correctedWords);
-
-                            break;
-                    }
+                    CheckGameMoving();
                     break;
-
                 case Phase.IN_GAME_ACHIEVING:
-                    // Add update logic here
-
-                    // Update score
-                    if (tilingGrid.LastDrawnWord.Length > 0)
-                    {
-                        playerTurn.CurrentPlayer.IncreaseScore(tilingGrid.LastDrawnWord.Length);
-                        notification.PushMessage(tilingGrid.LastDrawnWord);
-
-                        // Clear last drawn word
-                        tilingGrid.LastDrawnWord = "";
-                    }
-
-                    // Finished presenting achieved words
-                    if (tilingGrid.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED && 
-                        notification.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED &&
-                        playerTurn.CurrentPlayer.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED)
-                    {
-                        Global.CurrentPhase = Phase.IN_GAME_END_TURN;
-                        playerTurn.Update(gameTime);
-                    }
-
+                    CheckGameAchieving(gameTime);
+                    break;
+                case Phase.END_GAME_ANIMATING:
+                    CheckEndGameAnimating(gameTime);
                     break;
             }
 
             keyboardController.Update(gameTime);
             mouseController.Update(gameTime);
+            cursor.Update(gameTime);
             
             // Check current phase
             switch (Global.CurrentPhase)
@@ -233,18 +193,134 @@ namespace WordBattle
                 case Phase.IN_GAME_ACHIEVING:
                     UpdateGameAchieving(gameTime);
                     break;
+                case Phase.END_GAME_ANIMATING:
+                    UpdateEndGameAnimating(gameTime);
+                    break;
             }
 
             base.Update(gameTime);
+        }
+
+        private void CheckEndGameAnimating(GameTime gameTime)
+        {
+            if (tilingGrid.EntityPhase == Phase.END_GAME_ANIMATING_FINISHED &&
+                playerTurn.EntityPhase == Phase.END_GAME_ANIMATING_FINISHED &&
+                logoPanel.EntityPhase == Phase.END_GAME_ANIMATING_FINISHED)
+            {
+                Global.UpdatePhase(Phase.MENU_LOADING);
+            }
+
+        }
+
+        private void UpdateEndGameAnimating(GameTime gameTime)
+        {
+            tilingGrid.Update(gameTime);
+            playerTurn.Update(gameTime);
+            notification.Update(gameTime);
+
+            if (tilingGrid.EntityPhase == Phase.END_GAME_ANIMATING_FINISHED)
+                logoPanel.Update(gameTime);
+        }
+
+        private void CheckMenuLoading()
+        {
+            if (menuContainer.EnityPhase == Phase.MENU_LOADING_FINISHED)
+                Global.UpdatePhase(Phase.MENU);
+        }
+
+        private void CheckMenu()
+        {
+            gameMode = menuContainer.GetSelectedMode();
+            if (gameMode != GameMode.NONE)
+            {
+                p1Name = menuContainer.GetPlayer1Name();
+                p2Name = menuContainer.GetPlayer2Name();
+                roomName = menuContainer.GetRoomName();
+                Global.UpdatePhase(Phase.MENU_SELECTED_ANIMATING);
+            }
+
+            if (backButton.IsClicked)
+                Exit();
+        }
+
+        private void CheckMenuSelectedAnimating()
+        {
+            if (menuContainer.EnityPhase == Phase.MENU_SELECTED_ANIMATING_FINISHED &&
+                logoPanel.EntityPhase == Phase.MENU_SELECTED_ANIMATING_FINISHED)
+            {
+                CreateNewGame();
+                notification.PushMessage("READY");
+                Global.UpdatePhase(Phase.IN_GAME_LOADING);
+            }
+        }
+
+        private void CheckGameLoading()
+        {
+            // Add update logic here
+
+            // Finished loading 
+            if (tilingGrid.EntityPhase == Phase.IN_GAME_LOADING_FINISHED)
+            {
+                notification.PushMessage("GO");
+                Global.UpdatePhase(Phase.IN_GAME_MOVING);
+            }
+        }
+
+        private void CheckGameMoving()
+        {
+            if (backButton.IsClicked)
+            {
+                tilingGrid.InitializeAnimating();
+                playerTurn.InitializeAnimating();
+                Global.UpdatePhase(Phase.END_GAME_ANIMATING);
+                return;
+            }
+            switch (tilingGrid.EntityPhase)
+            {
+                case Phase.IN_GAME_MOVING_FINISHED:
+                    // Show achieved words
+
+                    var index = tilingGrid.SelectedIndex;
+                    var correctedWords = gridMap.GetCorrectedWords(index);
+
+                    tilingGrid.AchieveWords(correctedWords);
+
+                    break;
+            }
+        }
+
+        private void CheckGameAchieving(GameTime gameTime)
+        {
+            // Add update logic here
+
+            // Update score
+            if (tilingGrid.LastDrawnWord.Length > 0)
+            {
+                playerTurn.CurrentPlayer.IncreaseScore(tilingGrid.LastDrawnWord.Length);
+                notification.PushMessage(tilingGrid.LastDrawnWord);
+
+                // Clear last drawn word
+                tilingGrid.LastDrawnWord = "";
+            }
+
+            // Finished presenting achieved words
+            if (tilingGrid.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED &&
+                notification.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED &&
+                playerTurn.CurrentPlayer.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED)
+            {
+                Global.CurrentPhase = Phase.IN_GAME_END_TURN;
+                playerTurn.Update(gameTime);
+            }
         }
 
         private void UpdateMenu(GameTime gameTime)
         {
             menuContainer.Update(gameTime);
             logoPanel.Update(gameTime);
-        }
 
-        Vector3 logoTranslation;
+            if (Global.CurrentPhase == Phase.MENU)
+                backButton.Update(gameTime);
+        }
 
         private void CreateNewGame()
         {
@@ -282,6 +358,7 @@ namespace WordBattle
                         Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
                         Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
                         p2Name, "Single");
+                    p2.PlayerController = PlayerGameController.GetInstance();
 
                     break;
             }
@@ -294,7 +371,7 @@ namespace WordBattle
         {
             notification.Update(gameTime);
             playerTurn.Update(gameTime);
-            if (playerTurn.Players[1].EntityPhase == Phase.IN_GAME_LOADING_FINISHED)
+            if (playerTurn.EntityPhase == Phase.IN_GAME_LOADING_FINISHED)
                 tilingGrid.Update(gameTime);
         }
 
@@ -302,7 +379,8 @@ namespace WordBattle
         {
             notification.Update(gameTime);
             playerTurn.Update(gameTime);
-            tilingGrid.Update(gameTime);            
+            tilingGrid.Update(gameTime);
+            backButton.Update(gameTime);
         }
 
         private void UpdateGameAchieving(GameTime gameTime)
@@ -320,37 +398,56 @@ namespace WordBattle
         {
             GraphicsDevice.Clear(Color.White);
 
-            spriteBatch.Begin(
-                SpriteSortMode.BackToFront,
-                //BlendState.AlphaBlend,
-                Utilities.PSBlendState.Multiply,
-                null,
-                DepthStencilState.None,
-                RasterizerState.CullNone,
-                null,
-                Global.MainCamera.WVP);
-
             switch (Global.CurrentPhase)
             {
                 case Phase.MENU_LOADING:
                 case Phase.MENU:
                 case Phase.MENU_SELECTED_ANIMATING:
+                    spriteBatch.Begin(
+                        SpriteSortMode.BackToFront,
+                        //BlendState.AlphaBlend,
+                        Utilities.PSBlendState.Multiply,
+                        null,
+                        DepthStencilState.None,
+                        RasterizerState.CullNone,
+                        null,
+                        Global.MainCamera.WVP);
+                    cursor.Draw(gameTime, spriteBatch);
                     logoPanel.Draw(gameTime, spriteBatch);
                     background.Draw(gameTime, spriteBatch);
                     menuContainer.Draw(gameTime, spriteBatch);
+
+                    if (Global.CurrentPhase == Phase.MENU)
+                        backButton.Draw(gameTime, spriteBatch);
+
+                    spriteBatch.End();
                     break;
                 case Phase.IN_GAME_LOADING:
                 case Phase.IN_GAME_MOVING:
                 case Phase.IN_GAME_ACHIEVING:
+                case Phase.END_GAME_ANIMATING:
+                    spriteBatch.Begin(
+                        SpriteSortMode.BackToFront,
+                        //BlendState.AlphaBlend,
+                        Utilities.PSBlendState.Multiply,
+                        null,
+                        DepthStencilState.None,
+                        RasterizerState.CullNone,
+                        null,
+                        Global.MainCamera.WVP);
+                    cursor.Draw(gameTime, spriteBatch);
                     logoPanel.Draw(gameTime, spriteBatch);
                     background.Draw(gameTime, spriteBatch);
                     playerTurn.Draw(gameTime, spriteBatch);
                     tilingGrid.Draw(gameTime, spriteBatch);
                     notification.Draw(gameTime, spriteBatch);
+
+                    if (Global.CurrentPhase == Phase.IN_GAME_MOVING)
+                        backButton.Draw(gameTime, spriteBatch);
+
+                    spriteBatch.End();
                     break;
             }
-
-            spriteBatch.End();
 
             base.Draw(gameTime);
         }

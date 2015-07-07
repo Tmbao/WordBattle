@@ -20,5 +20,7 @@ namespace WordBattle.InvisibleGameEntities
         IN_GAME_ACHIEVING,
         IN_GAME_ACHIEVING_FINISHED,
         IN_GAME_END_TURN,
+        END_GAME_ANIMATING,
+        END_GAME_ANIMATING_FINISHED,
     }
 }

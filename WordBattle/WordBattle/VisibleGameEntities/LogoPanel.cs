@@ -68,6 +68,15 @@ namespace WordBattle.VisibleGameEntities
                     if (top < Consts.LOGO_TOP)
                         top = Consts.LOGO_TOP;
                     break;
+                case Phase.END_GAME_ANIMATING:
+                    left += dx;
+                    top += dy;
+
+                    if (left > center_left)
+                        left = center_left;
+                    if (top > center_top)
+                        top = center_top;
+                    break;
             }
 
             base.Update(gameTime);
@@ -83,6 +92,10 @@ namespace WordBattle.VisibleGameEntities
                 case Phase.MENU_SELECTED_ANIMATING:
                     if (left == Consts.LOGO_LEFT && top == Consts.LOGO_TOP)
                         entityPhase = Phase.MENU_SELECTED_ANIMATING_FINISHED;
+                    break;
+                case Phase.END_GAME_ANIMATING:
+                    if (left == center_left && top == center_top)
+                        entityPhase = Phase.END_GAME_ANIMATING_FINISHED;
                     break;
             }
         }

@@ -32,7 +32,7 @@ namespace WordBattle
 
         public static readonly int LOGO_WIDTH = 275;
         public static readonly int LOGO_HEIGHT = 200;
-        public static readonly float LOGO_TRANSLATION_TIME = 70;
+        public static readonly float LOGO_TRANSLATION_TIME = 75;
 
         public static readonly char NONE = WordBattleCore.Consts.NONE;
         public static readonly char SPACE = WordBattleCore.Consts.SPACE;
@@ -43,7 +43,7 @@ namespace WordBattle
 
 
         public static readonly float INTENSITY_LOADING_MAX = 1f;
-        public static readonly float INTENSITY_LOADING_DELTA = 0.5f;
+        public static readonly float INTENSITY_LOADING_DELTA = 0.75f;
         public static readonly float INTENSITY_HOVER_MAX = 0.75f;
         public static readonly float INTENSITY_HOVER_DELTA = 0.075f;
         public static readonly float INTENSITY_SELECTED = 1f;
@@ -87,5 +87,8 @@ namespace WordBattle
         public static readonly int MENU_FONT_SIZE = 40;
         public static readonly int MENU_LEFT = 75;
         public static readonly int MENU_TOP = 260;
+
+        public static readonly int BUTTON_WIDTH = 40;
+        public static readonly int BUTTON_HEIGHT = 40;
     }
 }

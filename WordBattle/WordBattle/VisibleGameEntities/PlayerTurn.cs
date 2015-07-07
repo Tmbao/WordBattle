@@ -35,6 +35,23 @@ namespace WordBattle.VisibleGameEntities
         int turn;
         PlayerEntity[] players;
 
+        public Phase EntityPhase
+        {
+            get
+            {
+                if (players[0].EntityPhase == Phase.IN_GAME_LOADING_FINISHED &&
+                    players[1].EntityPhase == Phase.IN_GAME_LOADING_FINISHED)
+                    return Phase.IN_GAME_LOADING_FINISHED;
+                if (players[0].EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED &&
+                    players[1].EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED)
+                    return Phase.IN_GAME_ACHIEVING_FINISHED;
+                if (players[0].EntityPhase == Phase.END_GAME_ANIMATING_FINISHED &&
+                    players[1].EntityPhase == Phase.END_GAME_ANIMATING_FINISHED)
+                    return Phase.END_GAME_ANIMATING_FINISHED;
+                return Phase.NONE;
+            }
+        }
+
         public PlayerEntity[] Players
         {
             get { return players; }
@@ -75,8 +92,10 @@ namespace WordBattle.VisibleGameEntities
                     players[1].Update(gameTime);
                     break;
                 case Phase.IN_GAME_LOADING:
+                case Phase.END_GAME_ANIMATING:
                     players[0].Update(gameTime);
-                    if (players[0].EntityPhase == Phase.IN_GAME_LOADING_FINISHED)
+                    if (players[0].EntityPhase == Phase.IN_GAME_LOADING_FINISHED ||
+                        players[0].EntityPhase == Phase.END_GAME_ANIMATING_FINISHED)
                         players[1].Update(gameTime);
                     break;
             }
@@ -88,6 +107,7 @@ namespace WordBattle.VisibleGameEntities
         {
             switch (Global.CurrentPhase) {
                 case Phase.IN_GAME_LOADING:
+                case Phase.END_GAME_ANIMATING:
                     players[0].Draw(gameTime, spriteBatch);
                     players[1].Draw(gameTime, spriteBatch);
                     break;
@@ -98,8 +118,12 @@ namespace WordBattle.VisibleGameEntities
                     CurrentPlayer.DrawHighlightName(gameTime, spriteBatch);
                     break;
             }
-            
-            
+        }
+
+        public void InitializeAnimating()
+        {
+            players[0].InitializeAnimating();
+            players[1].InitializeAnimating();
         }
     }
 }

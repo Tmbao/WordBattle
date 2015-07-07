@@ -24,8 +24,12 @@ namespace WordBattle.VisibleGameEntities
 
         public bool IsSelected
         {
-            get { return isSelected; }
-            set { isSelected = value; }
+            get {
+                var temp = isSelected;
+                isSelected = false;
+                return temp; 
+            }
+            private set { isSelected = value; }
         }
 
         float left, top;

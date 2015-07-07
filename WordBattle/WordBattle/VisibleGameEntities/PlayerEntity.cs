@@ -89,6 +89,11 @@ namespace WordBattle.VisibleGameEntities
             this.playerImageHighlighter = new Sprite2D(0, 0, Utils.LoadTextures(Utils.GetImageFileName(Consts.LIGHT)));
 
             intensity = new float[Consts.MAX_NAME_LENGTH];
+            InitializeAnimating();
+        }
+
+        public void InitializeAnimating()
+        {
             appearOrder = new List<int>();
             for (int index = 0; index < intensity.Length; index++)
             {
@@ -130,6 +135,9 @@ namespace WordBattle.VisibleGameEntities
                     break;
                 case Phase.IN_GAME_MOVING:
                     playerController.Update(gameTime);
+                    break;
+                case Phase.END_GAME_ANIMATING:
+                    UpdateLoading(gameTime);
                     break;
             }
             playerImage.Update(gameTime);
@@ -191,7 +199,19 @@ namespace WordBattle.VisibleGameEntities
                         entityPhase = Phase.IN_GAME_LOADING_FINISHED;
 
                     break;
-                default:
+                case Phase.END_GAME_ANIMATING:
+                    DrawPlayerImage(gameTime, spriteBatch, Consts.INTENSITY_LOADING_MAX - GetImageIntensity());
+                    DrawUnloadingPlayerName(gameTime, spriteBatch);
+                    DrawUnloadingPlayerScore(gameTime, spriteBatch);
+
+                    if (IsIntensityAllZeroes())
+                        entityPhase = Phase.END_GAME_ANIMATING_FINISHED;
+
+                    break;
+                case Phase.IN_GAME_MOVING:
+                case Phase.IN_GAME_ACHIEVING:
+                case Phase.IN_GAME_ACHIEVING_FINISHED:
+                case Phase.IN_GAME_LOADING_FINISHED:
                     DrawPlayerImage(gameTime, spriteBatch);
                     DrawPlayerName(gameTime, spriteBatch);
                     DrawPlayerScore(gameTime, spriteBatch);
@@ -202,6 +222,38 @@ namespace WordBattle.VisibleGameEntities
 
                     break;
             }
+        }
+
+        private void DrawUnloadingPlayerScore(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            var tiles = TileSpriteContainer.GetInstance();
+
+            string score = playerRecord.PlayerScore.ToString();
+            while (score.Length < Consts.MAX_SCORE_DIGIT)
+                score = "0" + score;
+
+            // Show in the center
+            // float shift = (width - Utils.GetTextWidth(score, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
+            // Show in the left
+            float shift = 0;
+            tiles.DrawText(gameTime, spriteBatch, score,
+                left + Consts.PLAYER_IMAGE_WIDTH + Consts.COMPONENT_SPACING + shift,
+                top + Consts.COMPONENT_SPACING + Consts.PLAYER_FONT_SIZE + Consts.COMPONENT_SPACING,
+                Consts.PLAYER_FONT_SIZE, intensity);
+        }
+
+        private void DrawUnloadingPlayerName(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            var tiles = TileSpriteContainer.GetInstance();
+
+            // Show in the center
+            // float shift = (width - Utils.GetTextWidth(playerRecord.PlayerName, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
+            // Show in the left
+            float shift = 0;
+            tiles.DrawText(gameTime, spriteBatch, playerRecord.PlayerName,
+                left + Consts.PLAYER_IMAGE_WIDTH + Consts.COMPONENT_SPACING + shift,
+                top + Consts.COMPONENT_SPACING,
+                Consts.PLAYER_FONT_SIZE, intensity);
         }
 
         private float GetImageIntensity()

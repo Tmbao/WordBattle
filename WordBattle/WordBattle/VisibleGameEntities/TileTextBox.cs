@@ -44,13 +44,18 @@ namespace WordBattle.VisibleGameEntities
             this.title = title;
             this.text = "";
             
-            intensity = Consts.INTENSITY_MENU_MAX;
+            intensity = 0;
             entityPhase = Phase.MENU;
         }
 
         public override void Update(GameTime gameTime)
         {
             switch (entityPhase) {
+                case Phase.MENU_LOADING:
+                    intensity += Consts.INTENSITY_MENU_DELTA;
+                    if (intensity > Consts.INTENSITY_MENU_MAX)
+                        intensity = Consts.INTENSITY_MENU_MAX;
+                    break;
                 case Phase.MENU:
                     UpdateMouse();
                     UpdateKeyboard();
@@ -60,6 +65,7 @@ namespace WordBattle.VisibleGameEntities
                     if (intensity < 0)
                         intensity = 0;
                     break;
+                
             }
             
             base.Update(gameTime);
@@ -115,8 +121,18 @@ namespace WordBattle.VisibleGameEntities
                 tiles.DrawText(gameTime, spriteBatch, drawingText, left + Consts.TEXTBOX_TITLE_LENGTH * Consts.TEXTBOX_TEXT_WIDTH + (Consts.TEXTBOX_TITLE_LENGTH - 1) * Consts.TEXT_SPACING + 2 * Consts.COMPONENT_SPACING, top, Consts.TEXTBOX_TEXT_WIDTH, intensity);
             }
 
-            if (intensity == 0)
-                entityPhase = Phase.MENU_SELECTED_ANIMATING_FINISHED;
+            
+            switch (entityPhase)
+            {
+                case Phase.MENU_LOADING:
+                    if (intensity == Consts.INTENSITY_MENU_MAX)
+                        entityPhase = Phase.MENU_LOADING_FINISHED;
+                    break;
+                case Phase.MENU_SELECTED_ANIMATING:
+                    if (intensity == 0)
+                        entityPhase = Phase.MENU_SELECTED_ANIMATING_FINISHED;
+                    break;
+            }   
         }
     }
 }

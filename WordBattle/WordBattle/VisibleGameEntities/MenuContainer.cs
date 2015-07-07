@@ -43,8 +43,6 @@ namespace WordBattle.VisibleGameEntities
             }
         }
 
-        
-
         private MenuContainer()
         {
 

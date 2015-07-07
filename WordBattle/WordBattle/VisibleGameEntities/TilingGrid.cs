@@ -119,6 +119,12 @@ namespace WordBattle.VisibleGameEntities
             this.mapHeight = this.TileHeight * wordGrid.NumberOfRows;
 
             intensity = new float[wordGrid.NumberOfRows, wordGrid.NumberOfColumns];
+            InitializeAnimating();
+        }
+
+        public void InitializeAnimating()
+        {
+            intensity = new float[wordGrid.NumberOfRows, wordGrid.NumberOfColumns];
             appearOrder = new List<Tuple<int, int>>();
             for (int row = 0; row < wordGrid.NumberOfRows; row++)
                 for (int col = 0; col < wordGrid.NumberOfColumns; col++)
@@ -140,8 +146,6 @@ namespace WordBattle.VisibleGameEntities
                     appearOrder[i] = appearOrder[j];
                     appearOrder[j] = temp;
                 }
-
-            entityPhase = Phase.IN_GAME_LOADING;
         }
 
         public override void Update(GameTime gameTime)
@@ -156,6 +160,9 @@ namespace WordBattle.VisibleGameEntities
                     break;
                 case Phase.IN_GAME_ACHIEVING:
                     UpdateAchieving(gameTime);
+                    break;
+                case Phase.END_GAME_ANIMATING:
+                    UpdateLoading(gameTime);
                     break;
             }
 
@@ -294,6 +301,11 @@ namespace WordBattle.VisibleGameEntities
                 case Phase.IN_GAME_MOVING_FINISHED:
                     DrawAllTilesAndEffects(gameTime, spriteBatch);
                     break;
+                case Phase.END_GAME_ANIMATING:
+                    DrawAllTilesAndEffects(gameTime, spriteBatch);
+                    if (IsIntensityAllZeros() == true)
+                        entityPhase = Phase.END_GAME_ANIMATING_FINISHED;
+                    break;
             }
         }
 
@@ -318,6 +330,10 @@ namespace WordBattle.VisibleGameEntities
             if (entityPhase == Phase.IN_GAME_LOADING)
             {
                 tile.Draw(gameTime, spriteBatch, left, top, Consts.INTENSITY_LOADING_MAX - intensity[row, col]);
+            }
+            else if (entityPhase == Phase.END_GAME_ANIMATING)
+            {
+                tile.Draw(gameTime, spriteBatch, left, top, intensity[row, col]);
             }
             else
             {
