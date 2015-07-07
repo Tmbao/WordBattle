@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using WordBattleCore.GridEntities;
 using WordBattle.Utilities;
 using Microsoft.Xna.Framework.Input;
+using WordBattlePlayer;
 
 namespace WordBattle.ControllerGameEntities
 {
@@ -30,7 +31,6 @@ namespace WordBattle.ControllerGameEntities
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
             keyboardController.Update(gameTime);
             mouseController.Update(gameTime);
 

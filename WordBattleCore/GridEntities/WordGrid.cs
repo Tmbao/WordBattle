@@ -62,6 +62,14 @@ namespace WordBattleCore.GridEntities
                 _grid[gridData.Obstacle[index].Item1, gridData.Obstacle[index].Item2] = Consts.OBSTACLE;
         }
 
+        bool firstMove;
+
+        public bool FirstMove
+        {
+            get { return firstMove; }
+            set { firstMove = value; }
+        }
+
         public void IntializeNewMap()
         {
             List<Tuple<int, int>> freeCells = new List<Tuple<int, int>>();
@@ -75,11 +83,7 @@ namespace WordBattleCore.GridEntities
                     if (grid[row, col] == Consts.BLANK)
                         freeCells.Add(new Tuple<int, int>(row, col));
                 }
-
-            // Fill one of the freecells with an arbitrary letter
-            int index = new Random().Next(freeCells.Count);
-            char randChar = (char) (new Random().Next(26) + (int) 'A');
-            grid[freeCells[index].Item1, freeCells[index].Item2] = randChar;
+            firstMove = true;
         }
 
         public bool CanFill(Tuple<int, int> selectedIndex)
@@ -90,6 +94,9 @@ namespace WordBattleCore.GridEntities
             // The current position has been already filled
             else if (wordGrid.Grid[selectedIndex.Item1, selectedIndex.Item2] != Consts.BLANK)
                 return false;
+            // The first one can fill an arbitrary cell
+            else if (firstMove)
+                return true;
             else
             {
                 // Check for adjacent 
@@ -128,6 +135,8 @@ namespace WordBattleCore.GridEntities
                 if (IsInside(adjacentIndex) && Char.IsLetter(grid[adjacentIndex.Item1, adjacentIndex.Item2]))
                     Travel(adjacentIndex, node.ChildAt(grid[adjacentIndex.Item1, adjacentIndex.Item2]));
             }
+
+            correctedWord.Pop();
         }
 
         public Queue<Queue<Tuple<int, int>>> GetCorrectedWords(Tuple<int, int> index)

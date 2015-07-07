@@ -14,6 +14,7 @@ using WordBattle.Utilities;
 using WordBattleCore.GridEntities;
 using WordBattle.ControllerGameEntities;
 using WordBattleCore.Dictionary;
+using WordBattlePlayer.Computer;
 
 namespace WordBattle
 {
@@ -32,6 +33,7 @@ namespace WordBattle
         LogoPanel logoPanel;
         TilingGrid tilingGrid;
         PlayerTurn playerTurn;
+        GameNotification notification;
 
         public WordBattleGame()
         {
@@ -80,12 +82,17 @@ namespace WordBattle
             dictionary = TrieDictionary.GetInstance();
             dictionary.Load(Content.Load<string[]>(Utils.GetDictionaryFileName(Consts.DEFAULT_DICTIONARY_NAME)));
 
+            // Initialize logo panel
             logoPanel = LogoPanel.GetInstance();
 
+            // Initialize background
             background = new Sprite2D(0, 0, Utils.LoadSprite(Utils.GetImageFileName("Background")));
 
+            // Initialize notification
+            notification = GameNotification.GetInstance();
+
             // Just for testing
-            Global.CurrentPhase = Phase.PRE_GAME;
+            Global.CurrentPhase = Phase.NEW_GAME;
         }
 
         
@@ -116,6 +123,18 @@ namespace WordBattle
             // Check and switch into new phase
             switch (Global.CurrentPhase)
             {
+                case Phase.NEW_GAME:
+                    break;
+                case Phase.IN_GAME_LOADING:
+                    // Add update logic here
+
+                    // Finished loading 
+                    if (tilingGrid.EntityPhase == Phase.IN_GAME_LOADING_FINISHED)
+                    {
+                        notification.PushMessage("GO");
+                        Global.UpdatePhase(Phase.IN_GAME_MOVING);
+                    }
+                    break;
                 case Phase.IN_GAME_MOVING:
                     switch (tilingGrid.EntityPhase)
                     {
@@ -138,13 +157,15 @@ namespace WordBattle
                     if (tilingGrid.LastDrawedWord.Length > 0)
                     {
                         playerTurn.CurrentPlayer.IncreaseScore(tilingGrid.LastDrawedWord.Length);
+                        notification.PushMessage(tilingGrid.LastDrawedWord);
 
                         // Clear last drawed word
                         tilingGrid.LastDrawedWord = "";
                     }
 
-                    // Finihsed presenting achieved words
+                    // Finished presenting achieved words
                     if (tilingGrid.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED && 
+                        notification.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED &&
                         playerTurn.CurrentPlayer.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED)
                     {
                         Global.CurrentPhase = Phase.IN_GAME_END_TURN;
@@ -157,8 +178,11 @@ namespace WordBattle
             // Check current phase
             switch (Global.CurrentPhase)
             {
-                case Phase.PRE_GAME:
-                    UpdatePreGame(gameTime);
+                case Phase.NEW_GAME:
+                    UpdateNewGame(gameTime);
+                    break;
+                case Phase.IN_GAME_LOADING:
+                    UpdateGameLoading(gameTime);
                     break;
                 case Phase.IN_GAME_MOVING:
                     UpdateGameMoving(gameTime);
@@ -171,21 +195,8 @@ namespace WordBattle
             base.Update(gameTime);
         }
 
-        private void UpdateGameAchieving(GameTime gameTime)
+        private void UpdateNewGame(GameTime gameTime)
         {
-            tilingGrid.Update(gameTime);
-            playerTurn.Update(gameTime);
-        }
-
-        private void UpdateGameMoving(GameTime gameTime)
-        {
-            playerTurn.Update(gameTime);
-            tilingGrid.Update(gameTime);
-        }
-
-        private void UpdatePreGame(GameTime gameTime)
-        {
-
             gridMap.IntializeNewMap();
 
             tilingGrid = TilingGrid.GetInstance();
@@ -197,19 +208,42 @@ namespace WordBattle
             var p1 = new PlayerEntity(
                 Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
                 Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
-                "PLAYER1");
+                "TMBAO", "Human");
             p1.PlayerController = PlayerGameController.GetInstance();
 
             var p2 = new PlayerEntity(
                 Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
                 Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
-                "PLAYER2");
-            p2.PlayerController = PlayerGameController.GetInstance();
+                "RANDOMAI", "AI");
+            p2.PlayerController = new RandomAIPlayer();
 
             playerTurn = PlayerTurn.GetInstance();
             playerTurn.NewGame(p1, p2, 0);
 
-            Global.CurrentPhase = Phase.IN_GAME_MOVING;
+            Global.UpdatePhase(Phase.IN_GAME_LOADING);
+            notification.PushMessage("READY");
+        }
+
+        private void UpdateGameLoading(GameTime gameTime)
+        {
+            notification.Update(gameTime);
+            playerTurn.Update(gameTime);
+            if (playerTurn.Players[1].EntityPhase == Phase.IN_GAME_LOADING_FINISHED)
+                tilingGrid.Update(gameTime);
+        }
+
+        private void UpdateGameMoving(GameTime gameTime)
+        {
+            notification.Update(gameTime);
+            playerTurn.Update(gameTime);
+            tilingGrid.Update(gameTime);            
+        }
+
+        private void UpdateGameAchieving(GameTime gameTime)
+        {
+            tilingGrid.Update(gameTime);
+            playerTurn.Update(gameTime);
+            notification.Update(gameTime);
         }
 
         /// <summary>
@@ -223,7 +257,7 @@ namespace WordBattle
             // TODO: Add your drawing code here
             spriteBatch.Begin(
                 SpriteSortMode.BackToFront,
-                // BlendState.AlphaBlend,
+                //BlendState.AlphaBlend,
                 Utilities.PSBlendState.Multiply,
                 null,
                 DepthStencilState.None,
@@ -235,6 +269,7 @@ namespace WordBattle
             logoPanel.Draw(gameTime, spriteBatch);
             playerTurn.Draw(gameTime, spriteBatch);
             tilingGrid.Draw(gameTime, spriteBatch);
+            notification.Draw(gameTime, spriteBatch);
 
             spriteBatch.End();
 

@@ -92,5 +92,38 @@ namespace WordBattle.Utilities
                     return new Tuple<int, int>(row, col);
             }
         }
+
+        internal static string GetImageFileName(char c)
+        {
+            c = Char.ToUpper(c);
+            if (c == Consts.SPACE)
+            {
+                return @"Images\Space";
+            }
+            else if (c == Consts.BLANK)
+            {
+                return @"Images\Blank";
+            }
+            else if (c == Consts.OBSTACLE)
+            {
+                return @"Images\Obstacle";
+            }
+            else if (c == Consts.LIGHT)
+            {
+                return @"Images\Light";
+            }
+            else if (c == Consts.LIGHT_BLUE)
+            {
+                return @"Images\LightBlue";
+            }
+            else if (Char.IsLetter(c) || Char.IsDigit(c))
+            {
+                return String.Format(@"Images\{0}", c);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

@@ -9,13 +9,13 @@ namespace WordBattle.ControllerGameEntities
 {
     public class MouseController : ControllerEntity<MouseState>
     {
-        private static MouseController mouseController;
+        private static MouseController instance;
 
         public static MouseController GetInstance() 
         {
-            if (mouseController == null)
-                mouseController = new MouseController();
-            return mouseController;
+            if (instance == null)
+                instance = new MouseController();
+            return instance;
         }
 
         private MouseController() 

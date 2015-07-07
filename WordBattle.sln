@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordBattleContent", "WordBa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordBattleCore", "WordBattleCore\WordBattleCore.csproj", "{9C2F1DD5-6C82-4D75-BFDA-5AB1CC88AF9E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordBattlePlayer", "WordBattlePlayer\WordBattlePlayer.csproj", "{125471A4-AF6E-40FF-AB18-A8C477C53C4D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -23,6 +25,10 @@ Global
 		{9C2F1DD5-6C82-4D75-BFDA-5AB1CC88AF9E}.Debug|x86.Build.0 = Debug|x86
 		{9C2F1DD5-6C82-4D75-BFDA-5AB1CC88AF9E}.Release|x86.ActiveCfg = Release|x86
 		{9C2F1DD5-6C82-4D75-BFDA-5AB1CC88AF9E}.Release|x86.Build.0 = Release|x86
+		{125471A4-AF6E-40FF-AB18-A8C477C53C4D}.Debug|x86.ActiveCfg = Debug|x86
+		{125471A4-AF6E-40FF-AB18-A8C477C53C4D}.Debug|x86.Build.0 = Debug|x86
+		{125471A4-AF6E-40FF-AB18-A8C477C53C4D}.Release|x86.ActiveCfg = Release|x86
+		{125471A4-AF6E-40FF-AB18-A8C477C53C4D}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

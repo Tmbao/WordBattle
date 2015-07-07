@@ -4,18 +4,19 @@ using System.Linq;
 using System.Text;
 using WordBattle.Utilities;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace WordBattle.VisibleGameEntities
 {
     class AllTileSprites : VisibleGameEntity
     {
-        private static AllTileSprites allTileSprites;
+        private static AllTileSprites instance;
 
         public static AllTileSprites GetInstance()
         {
-            if (allTileSprites == null)
-                allTileSprites = new AllTileSprites();
-            return allTileSprites;
+            if (instance == null)
+                instance = new AllTileSprites();
+            return instance;
         }
 
         private AllTileSprites()
@@ -45,6 +46,35 @@ namespace WordBattle.VisibleGameEntities
                 entry.Value.Update(gameTime);
 
             base.Update(gameTime);
+        }
+
+        public void DrawText(GameTime gameTime, SpriteBatch spriteBatch, string text, float left, float top, int size, float intensity)
+        {
+            for (int index = 0; index < text.Length; index++)
+            {
+                allTiles[text[index]].Draw(gameTime, spriteBatch,
+                    left + index * size + index * Consts.TEXT_SPACING,
+                    top,
+                    intensity,
+                    (float) size / Consts.TILE_WIDTH);
+            }
+        }
+
+        public void DrawText(GameTime gameTime, SpriteBatch spriteBatch, string text, float left, float top, int size, float[] intensity)
+        {
+            for (int index = 0; index < text.Length; index++)
+            {
+                allTiles[text[index]].Draw(gameTime, spriteBatch,
+                    left + index * size + index * Consts.TEXT_SPACING,
+                    top,
+                    intensity[index],
+                    (float)size / Consts.TILE_WIDTH);
+            }
+        }
+
+        public void DrawText(GameTime gameTime, SpriteBatch spriteBatch, string text, float left, float top, int size)
+        {
+            DrawText(gameTime, spriteBatch, text, left, top, size, 1);
         }
     }
 }

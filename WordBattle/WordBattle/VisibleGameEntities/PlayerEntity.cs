@@ -9,6 +9,7 @@ using WordBattle.InvisibleGameEntities;
 using WordBattle.Utilities;
 using WordBattle.VisibleGameEntities;
 using WordBattle.ControllerGameEntities;
+using WordBattlePlayer;
 
 namespace WordBattle.VisibleGameEntities
 {
@@ -50,6 +51,8 @@ namespace WordBattle.VisibleGameEntities
             set { playerRecord = value; }
         }
 
+        Sprite2D playerImage, playerImageHighlighter;
+
         Phase entityPhase;
 
         public Phase EntityPhase
@@ -66,7 +69,9 @@ namespace WordBattle.VisibleGameEntities
             set { playerController = value; }
         }
 
-        public PlayerEntity(float left, float top, int width, int height, string playerName)
+        List<int> appearOrder;
+
+        public PlayerEntity(float left, float top, int width, int height, string playerName, string playerImage)
         {
             this.left = left;
             this.top = top;
@@ -79,6 +84,30 @@ namespace WordBattle.VisibleGameEntities
             this.playerRecord = new PlayerRecord();
             this.playerRecord.PlayerName = playerName;
             this.playerRecord.PlayerScore = 0;
+
+            this.playerImage = new Sprite2D(0, 0, Utils.LoadSprite(Utils.GetImageFileName(playerImage)));
+            this.playerImageHighlighter = new Sprite2D(0, 0, Utils.LoadSprite(Utils.GetImageFileName(Consts.LIGHT)));
+
+            intensity = new float[Consts.MAX_NAME_LENGTH];
+            appearOrder = new List<int>();
+            for (int index = 0; index < intensity.Length; index++)
+            {
+                intensity[index] = Consts.INTENSITY_LOADING_MAX;
+                appearOrder.Add(index);
+            }
+
+            // Shuffle the order
+            Random rand = new Random();
+            for (int index = 0; index < intensity.Length; index++)
+            {
+                int i = rand.Next(appearOrder.Count);
+                int j = rand.Next(appearOrder.Count);
+
+                // Swap i and j
+                var temp = appearOrder[i];
+                appearOrder[i] = appearOrder[j];
+                appearOrder[j] = temp;
+            }
         }
 
         int increasingScore;
@@ -91,14 +120,37 @@ namespace WordBattle.VisibleGameEntities
 
         public override void Update(GameTime gameTime)
         {
-            playerController.Update(gameTime);
             switch (entityPhase)
             {
+                case Phase.IN_GAME_LOADING:
+                    UpdateLoading(gameTime);
+                    break;
                 case Phase.IN_GAME_ACHIEVING:
                     UpdateAchieving(gameTime);
                     break;
+                case Phase.IN_GAME_MOVING:
+                    playerController.Update(gameTime);
+                    break;
             }            
             base.Update(gameTime);
+        }
+
+        float[] intensity;
+
+        private void UpdateLoading(GameTime gameTime)
+        {
+            UpdateIntensity();
+        }
+
+        private void UpdateIntensity()
+        {
+            float delta = Consts.INTENSITY_LOADING_DELTA;
+            for (int index = 0; index < appearOrder.Count; index++)
+            {
+                float reduce = Math.Min(delta, intensity[appearOrder[index]]);
+                intensity[appearOrder[index]] -= reduce;
+                delta -= reduce;
+            }
         }
 
         int elapsedUpdateTime;
@@ -114,7 +166,7 @@ namespace WordBattle.VisibleGameEntities
                     playerRecord.PlayerScore++;
                     increasingScore--;
                 }
-                else
+                else if (increasingScore < 0)
                 {
                     playerRecord.PlayerScore--;
                     increasingScore++;
@@ -126,8 +178,96 @@ namespace WordBattle.VisibleGameEntities
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            DrawPlayerName(gameTime, spriteBatch);
-            DrawPlayerScore(gameTime, spriteBatch);
+            switch (entityPhase)
+            {
+                case Phase.IN_GAME_LOADING:
+                    DrawPlayerImage(gameTime, spriteBatch, GetImageIntensity());
+                    DrawLoadingPlayerName(gameTime, spriteBatch);
+                    DrawLoadingPlayerScore(gameTime, spriteBatch);
+
+                    if (IsIntensityAllZeroes())
+                        entityPhase = Phase.IN_GAME_LOADING_FINISHED;
+
+                    break;
+                default:
+                    DrawPlayerImage(gameTime, spriteBatch);
+                    DrawPlayerName(gameTime, spriteBatch);
+                    DrawPlayerScore(gameTime, spriteBatch);
+
+                    // Finish achieving phase
+                    if (entityPhase == Phase.IN_GAME_ACHIEVING && increasingScore == 0)
+                        entityPhase = Phase.IN_GAME_ACHIEVING_FINISHED;
+
+                    break;
+            }
+        }
+
+        private float GetImageIntensity()
+        {
+            float sum = 0;
+            for (int index = 0; index < intensity.Length; index++)
+                sum += Consts.INTENSITY_LOADING_MAX - intensity[index];
+            return sum / (Consts.INTENSITY_LOADING_MAX * intensity.Length);
+        }
+
+        private bool IsIntensityAllZeroes()
+        {
+            for (int index = 0; index < intensity.Length; index++)
+                if (intensity[index] != 0)
+                    return false;
+            return true;
+        }
+
+        private float[] ReverseIntensity()
+        {
+            float[] _intensity = new float[intensity.Length];
+
+            for (int index = 0; index < intensity.Length; index++)
+                _intensity[index] = Consts.INTENSITY_LOADING_MAX - intensity[index];
+
+            return _intensity;
+        }
+
+        private void DrawLoadingPlayerScore(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            var tiles = AllTileSprites.GetInstance();
+
+            string score = playerRecord.PlayerScore.ToString();
+            while (score.Length < Consts.MAX_SCORE_DIGIT)
+                score = "0" + score;
+
+            // Show in the center
+            // float shift = (width - Utils.GetTextWidth(score, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
+            // Show in the left
+            float shift = 0;
+            tiles.DrawText(gameTime, spriteBatch, score,
+                left + Consts.PLAYER_IMAGE_WIDTH + Consts.COMPONENT_SPACING + shift,
+                top + Consts.COMPONENT_SPACING + Consts.PLAYER_FONT_SIZE + Consts.COMPONENT_SPACING,
+                Consts.PLAYER_FONT_SIZE, ReverseIntensity());
+        }
+
+        private void DrawLoadingPlayerName(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            var tiles = AllTileSprites.GetInstance();
+
+            // Show in the center
+            // float shift = (width - Utils.GetTextWidth(playerRecord.PlayerName, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
+            // Show in the left
+            float shift = 0;
+            tiles.DrawText(gameTime, spriteBatch, playerRecord.PlayerName,
+                left + Consts.PLAYER_IMAGE_WIDTH + Consts.COMPONENT_SPACING + shift,
+                top + Consts.COMPONENT_SPACING,
+                Consts.PLAYER_FONT_SIZE, ReverseIntensity());
+        }
+
+        private void DrawPlayerImage(GameTime gameTime, SpriteBatch spriteBatch, float intensity)
+        {
+            playerImage.Draw(gameTime, spriteBatch, left, top, intensity, (float) Consts.PLAYER_IMAGE_WIDTH / playerImage.Width);
+        }
+
+        private void DrawPlayerImage(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            DrawPlayerImage(gameTime, spriteBatch, 1);
         }
 
         private void DrawPlayerScore(GameTime gameTime, SpriteBatch spriteBatch)
@@ -135,53 +275,36 @@ namespace WordBattle.VisibleGameEntities
             var tiles = AllTileSprites.GetInstance();
 
             string score = playerRecord.PlayerScore.ToString();
-            while (score.Length < 6)
+            while (score.Length < Consts.MAX_SCORE_DIGIT)
                 score = "0" + score;
 
-            float shift = (width - Utils.GetTextWidth(score, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
-            for (int index = 0; index < score.Length; index++)
-            {
-                tiles.GetTileSprite(score[index]).Draw(gameTime, spriteBatch,
-                    left + shift + index * Consts.PLAYER_FONT_SIZE + index * Consts.PLAYER_TEXT_SPACING,
-                    top + Consts.PANEL_COMPONENT_SPACING + Consts.PLAYER_FONT_SIZE + Consts.PANEL_COMPONENT_SPACING,
-                    1,
-                    (float)Consts.PLAYER_FONT_SIZE / Consts.TILE_WIDTH);
-            }
-
-            // Finish achieving phase
-            if (entityPhase == Phase.IN_GAME_ACHIEVING && increasingScore == 0)
-                entityPhase = Phase.IN_GAME_ACHIEVING_FINISHED;
-
+            // Show in the center
+            // float shift = (width - Utils.GetTextWidth(score, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
+            // Show in the left
+            float shift = 0;
+            tiles.DrawText(gameTime, spriteBatch, score,
+                left + Consts.PLAYER_IMAGE_WIDTH + Consts.COMPONENT_SPACING + shift,
+                top + Consts.COMPONENT_SPACING + Consts.PLAYER_FONT_SIZE + Consts.COMPONENT_SPACING,
+                Consts.PLAYER_FONT_SIZE);
         }
 
         private void DrawPlayerName(GameTime gameTime, SpriteBatch spriteBatch)
         {
             var tiles = AllTileSprites.GetInstance();
 
-            float shift = (width - Utils.GetTextWidth(playerRecord.PlayerName, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
-            for (int index = 0; index < playerRecord.PlayerName.Length; index++)
-            {
-                tiles.GetTileSprite(playerRecord.PlayerName[index]).Draw(gameTime, spriteBatch,
-                    left + shift + index * Consts.PLAYER_FONT_SIZE + index * Consts.PLAYER_TEXT_SPACING,
-                    top + Consts.PANEL_COMPONENT_SPACING,
-                    1,
-                    (float) Consts.PLAYER_FONT_SIZE / Consts.TILE_WIDTH);
-            }
+            // Show in the center
+            // float shift = (width - Utils.GetTextWidth(playerRecord.PlayerName, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
+            // Show in the left
+            float shift = 0;
+            tiles.DrawText(gameTime, spriteBatch, playerRecord.PlayerName,
+                left + Consts.PLAYER_IMAGE_WIDTH + Consts.COMPONENT_SPACING + shift,
+                top + Consts.COMPONENT_SPACING,
+                Consts.PLAYER_FONT_SIZE);
         }
 
         public void DrawHighlightName(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var tiles = AllTileSprites.GetInstance();
-
-            float shift = (width - Utils.GetTextWidth(playerRecord.PlayerName, Consts.PLAYER_FONT_SIZE, Consts.PLAYER_TEXT_SPACING)) / 2;
-            for (int index = 0; index < playerRecord.PlayerName.Length; index++)
-            {
-                tiles.GetTileSprite(Consts.LIGHT).Draw(gameTime, spriteBatch,
-                    left + shift + index * Consts.PLAYER_FONT_SIZE + index * Consts.PLAYER_TEXT_SPACING,
-                    top + Consts.PANEL_COMPONENT_SPACING,
-                    Consts.INTENSITY_PLAYER_TURN,
-                    (float)Consts.PLAYER_FONT_SIZE / Consts.TILE_WIDTH);
-            }
+            playerImageHighlighter.Draw(gameTime, spriteBatch, left, top, 1, (float)Consts.PLAYER_IMAGE_WIDTH / playerImageHighlighter.Width);
         }
     }
 }

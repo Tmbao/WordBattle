@@ -14,13 +14,13 @@ namespace WordBattle.VisibleGameEntities
 {
     public class TilingGrid : VisibleGameEntity
     {
-        private static TilingGrid tilingGrid;
+        private static TilingGrid instance;
 
         public static TilingGrid GetInstance()
         {
-            if (tilingGrid == null)
-                tilingGrid = new TilingGrid();
-            return tilingGrid;
+            if (instance == null)
+                instance = new TilingGrid();
+            return instance;
         }
 
         private TilingGrid()
@@ -91,6 +91,20 @@ namespace WordBattle.VisibleGameEntities
 
         Queue<Queue<Tuple<int, int>>> achievingWords;
 
+        int elapsedUpdateTime;
+
+        string drawedWord;
+
+        string lastDrawedWord;
+
+        public string LastDrawedWord
+        {
+            get { return lastDrawedWord; }
+            set { lastDrawedWord = value; }
+        }
+
+        List<Tuple<int, int>> appearOrder;
+
         public void Load(float left, float top, int tileWidth, int tileHeight)
         {
             this.wordGrid = WordGrid.GetInstance();
@@ -103,12 +117,38 @@ namespace WordBattle.VisibleGameEntities
             this.mapHeight = this.TileHeight * wordGrid.NumberOfRows;
 
             intensity = new float[wordGrid.NumberOfRows, wordGrid.NumberOfColumns];
+            appearOrder = new List<Tuple<int, int>>();
+            for (int row = 0; row < wordGrid.NumberOfRows; row++)
+                for (int col = 0; col < wordGrid.NumberOfColumns; col++)
+                {
+                    intensity[row, col] = Consts.INTENSITY_LOADING_MAX;
+                    appearOrder.Add(new Tuple<int, int>(row, col));
+                }
+
+            // Shuffle the order
+            Random rand = new Random();
+            for (int row = 0; row < wordGrid.NumberOfRows; row++)
+                for (int col = 0; col < wordGrid.NumberOfColumns; col++)
+                {
+                    int i = rand.Next(appearOrder.Count);
+                    int j = rand.Next(appearOrder.Count);
+
+                    // Swap i and j
+                    var temp = appearOrder[i];
+                    appearOrder[i] = appearOrder[j];
+                    appearOrder[j] = temp;
+                }
+
+            entityPhase = Phase.IN_GAME_LOADING;
         }
 
         public override void Update(GameTime gameTime)
         {
             switch (entityPhase)
             {
+                case Phase.IN_GAME_LOADING:
+                    UpdateLoading(gameTime);
+                    break;
                 case Phase.IN_GAME_MOVING:
                     UpdateGame(gameTime);
                     break;
@@ -120,15 +160,18 @@ namespace WordBattle.VisibleGameEntities
             base.Update(gameTime);
         }
 
-        int elapsedUpdateTime;
-        string drawedWord;
-
-        string lastDrawedWord;
-
-        public string LastDrawedWord
+        private void UpdateLoading(GameTime gameTime)
         {
-            get { return lastDrawedWord; }
-            set { lastDrawedWord = value; }
+            float delta = Consts.INTENSITY_LOADING_DELTA;
+            for (int index = 0; index < appearOrder.Count; index++)
+            {
+                int row = appearOrder[index].Item1, col = appearOrder[index].Item2;
+                {
+                    float reduce = Math.Min(delta, intensity[row, col]);
+                    intensity[row, col] -= reduce;
+                    delta -= reduce;
+                }
+            }
         }
 
         private void UpdateAchieving(GameTime gameTime)
@@ -162,7 +205,7 @@ namespace WordBattle.VisibleGameEntities
                 }
 
                 // Update
-                intensity[index.Item1, index.Item2] = Consts.INTENSITY_MAX;
+                intensity[index.Item1, index.Item2] = Consts.INTENSITY_HOVER_MAX;
             }
             else
             {
@@ -173,7 +216,7 @@ namespace WordBattle.VisibleGameEntities
         private void UpdateGame(GameTime gameTime)
         {
             // Update light effect 
-            UpdateIntensity(gameTime, Consts.INTENSITY_DELTA);
+            UpdateIntensity(gameTime, Consts.INTENSITY_HOVER_DELTA);
 
             // Update on mouse over
             UpdateMouse();
@@ -199,14 +242,9 @@ namespace WordBattle.VisibleGameEntities
         {
             Tuple<int, int> index = Utils.GetIndexOfMouse(MouseController.GetInstance().GetCurrentMousePosition());
             if (index != null)
-                intensity[index.Item1, index.Item2] = Consts.INTENSITY_MAX;
+                intensity[index.Item1, index.Item2] = Consts.INTENSITY_HOVER_MAX;
 
             selectedIndex = PlayerTurn.GetInstance().CurrentPlayer.PlayerController.SelectedIndex();
-        }
-
-        private bool CanSelect(Tuple<int, int> selectedIndex)
-        {
-            return wordGrid.CanFill(selectedIndex);
         }
 
         private void UpdateIntensity(GameTime gameTime, float delta)
@@ -221,38 +259,51 @@ namespace WordBattle.VisibleGameEntities
         }
 
         // Return true if intensity array is all zeros, false otherwise
-        private bool IntensityState()
+        private bool IsIntensityAllZeros()
         {
-            bool state = true;
             for (int row = 0; row < wordGrid.NumberOfRows; row++)
                 for (int col = 0; col < wordGrid.NumberOfColumns; col++)
                     if (intensity[row, col] != 0)
-                        state = false;
-            return state;
+                        return false;
+            return true;
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            for (int row = 0; row < wordGrid.NumberOfRows; row++)
-                for (int col = 0; col < wordGrid.NumberOfColumns; col++)
-                    DrawTileAndEffects(gameTime, spriteBatch, col, row);
-
             switch (entityPhase)
             {
+                case Phase.IN_GAME_LOADING:
+                    DrawAllTilesAndEffects(gameTime, spriteBatch);
+                    if (IsIntensityAllZeros() == true)
+                        entityPhase = Phase.IN_GAME_LOADING_FINISHED;
+                    break;
                 case Phase.IN_GAME_ACHIEVING:
-                    if (IntensityState() == true)
+                    DrawAllTilesAndEffects(gameTime, spriteBatch);
+                    if (IsIntensityAllZeros() == true)
                         entityPhase = Phase.IN_GAME_ACHIEVING_FINISHED;
                     break;
                 case Phase.IN_GAME_MOVING:
+                    DrawAllTilesAndEffects(gameTime, spriteBatch);
                     // Player has ended turn
                     if (selectedIndex != null &&
                         PlayerTurn.GetInstance().CurrentPlayer.PlayerController.PressedCharacters() != null)
                         entityPhase = Phase.IN_GAME_MOVING_FINISHED;
                     break;
+                case Phase.IN_GAME_ACHIEVING_FINISHED:
+                case Phase.IN_GAME_MOVING_FINISHED:
+                    DrawAllTilesAndEffects(gameTime, spriteBatch);
+                    break;
             }
         }
 
-        private void DrawTileAndEffects(GameTime gameTime, SpriteBatch param, int col, int row)
+        private void DrawAllTilesAndEffects(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            for (int row = 0; row < wordGrid.NumberOfRows; row++)
+                for (int col = 0; col < wordGrid.NumberOfColumns; col++)
+                    DrawTileAndEffects(gameTime, spriteBatch, col, row);
+        }
+
+        private void DrawTileAndEffects(GameTime gameTime, SpriteBatch spriteBatch, int col, int row)
         {
             // Position of tile
             float top = this.top + row * tileHeight;
@@ -262,21 +313,29 @@ namespace WordBattle.VisibleGameEntities
 
             // Draw corresponding tile
             var tile = tiles.GetTileSprite(wordGrid.Grid[row, col]);
-            tile.Draw(gameTime, param, left, top);
 
-            // Draw light effects
-            if (entityPhase == Phase.IN_GAME_MOVING)
+            if (entityPhase == Phase.IN_GAME_LOADING)
             {
-                tile = tiles.GetTileSprite(Consts.LIGHT);
-                if (selectedIndex != null && selectedIndex.Item1 == row && selectedIndex.Item2 == col)
-                    tile.Draw(gameTime, param, left, top, Consts.INTENSITY_SELECTED);
-                else
-                    tile.Draw(gameTime, param, left, top, intensity[row, col]);
+                tile.Draw(gameTime, spriteBatch, left, top, Consts.INTENSITY_LOADING_MAX - intensity[row, col]);
             }
-            else if (entityPhase == Phase.IN_GAME_ACHIEVING)
+            else
             {
-                tile = tiles.GetTileSprite(Consts.LIGHT_BLUE);
-                tile.Draw(gameTime, param, left, top, intensity[row, col]);
+                tile.Draw(gameTime, spriteBatch, left, top);
+
+                // Draw light effects
+                if (entityPhase == Phase.IN_GAME_MOVING)
+                {
+                    tile = tiles.GetTileSprite(Consts.LIGHT);
+                    if (selectedIndex != null && selectedIndex.Item1 == row && selectedIndex.Item2 == col)
+                        tile.Draw(gameTime, spriteBatch, left, top, Consts.INTENSITY_SELECTED);
+                    else
+                        tile.Draw(gameTime, spriteBatch, left, top, intensity[row, col]);
+                }
+                else if (entityPhase == Phase.IN_GAME_ACHIEVING)
+                {
+                    tile = tiles.GetTileSprite(Consts.LIGHT_BLUE);
+                    tile.Draw(gameTime, spriteBatch, left, top, intensity[row, col]);
+                }
             }
         }
 
@@ -292,8 +351,7 @@ namespace WordBattle.VisibleGameEntities
                     intensity[row, col] = 0;
 
             // Update CurrentPhase
-            entityPhase = Phase.IN_GAME_ACHIEVING;
-            Global.CurrentPhase = Phase.IN_GAME_ACHIEVING;
+            Global.UpdatePhase(Phase.IN_GAME_ACHIEVING);
 
             // Draw immediately
             elapsedUpdateTime = Consts.DRAWING_EFFECT_TIME;

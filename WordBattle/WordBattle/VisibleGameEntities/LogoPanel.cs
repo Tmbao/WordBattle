@@ -16,13 +16,13 @@ namespace WordBattle.VisibleGameEntities
         const int WITHFRIENDS_TEXT_SIZE = 36;
         const int BACKGROUND_SIZE = 128;
 
-        private static LogoPanel logoPanel;
+        private static LogoPanel instance;
 
         public static LogoPanel GetInstance()
         {
-            if (logoPanel == null)
-                logoPanel = new LogoPanel();
-            return logoPanel;
+            if (instance == null)
+                instance = new LogoPanel();
+            return instance;
         }
 
         Sprite2D backgroundSprite;
@@ -54,42 +54,24 @@ namespace WordBattle.VisibleGameEntities
         private void DrawText(GameTime gameTime, SpriteBatch spriteBatch)
         {
             var tiles = AllTileSprites.GetInstance();
-            float shift;
 
             // Draw 'WORD'
-            string word = "WORD";
-            shift = BACKGROUND_SIZE + Consts.PANEL_COMPONENT_SPACING;
-            for (int index = 0; index < word.Length; index++)
-            {
-                tiles.GetTileSprite(word[index]).Draw(gameTime, spriteBatch,
-                    left + shift + index * WORD_TEXT_SIZE + index * Consts.PLAYER_TEXT_SPACING,
-                    top + 3 * Consts.PANEL_COMPONENT_SPACING,
-                    1,
-                    (float) WORD_TEXT_SIZE / Consts.TILE_WIDTH);
-            }
+            tiles.DrawText(gameTime, spriteBatch, "WORD",
+                left + BACKGROUND_SIZE + Consts.COMPONENT_SPACING,
+                top + 3 * Consts.COMPONENT_SPACING,
+                WORD_TEXT_SIZE);
 
             // Draw 'BATTLE'
-            string battle = "ATTLE";
-            shift = BACKGROUND_SIZE + Consts.PANEL_COMPONENT_SPACING;
-            for (int index = 0; index < battle.Length; index++)
-            {
-                tiles.GetTileSprite(battle[index]).Draw(gameTime, spriteBatch,
-                    left + shift + index * BATTLE_TEXT_SIZE + index * Consts.PLAYER_TEXT_SPACING,
-                    top + 3 * Consts.PANEL_COMPONENT_SPACING + WORD_TEXT_SIZE + Consts.PANEL_COMPONENT_SPACING,
-                    1,
-                    (float)BATTLE_TEXT_SIZE / Consts.TILE_WIDTH);
-            }
+            tiles.DrawText(gameTime, spriteBatch, "ATTLE",
+                left + BACKGROUND_SIZE + Consts.COMPONENT_SPACING,
+                top + 3 * Consts.COMPONENT_SPACING + WORD_TEXT_SIZE + Consts.COMPONENT_SPACING,
+                BATTLE_TEXT_SIZE);
 
             // Draw 'WITH FRIENDS'
-            string withFriends = "WITH FRIENDS";
-            for (int index = 0; index < withFriends.Length; index++)
-            {
-                tiles.GetTileSprite(withFriends[index]).Draw(gameTime, spriteBatch,
-                    left + index * WITH_FRIENDS_TEXT_SIZE + index * Consts.PLAYER_TEXT_SPACING,
-                    top + BACKGROUND_SIZE + Consts.PANEL_COMPONENT_SPACING,
-                    1,
-                    (float)WITH_FRIENDS_TEXT_SIZE / Consts.TILE_WIDTH);
-            }
+            tiles.DrawText(gameTime, spriteBatch, "WITH FRIENDS",
+                left,
+                top + BACKGROUND_SIZE + Consts.COMPONENT_SPACING,
+                WITH_FRIENDS_TEXT_SIZE);
         }
 
         public void DrawBackground(GameTime gameTime, SpriteBatch spriteBatch)

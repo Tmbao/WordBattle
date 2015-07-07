@@ -39,11 +39,16 @@ namespace WordBattle
         public static readonly char LIGHT = WordBattleCore.Consts.LIGHT;
         public static readonly char LIGHT_BLUE = WordBattleCore.Consts.LIGHT_BLUE;
 
-        public static readonly float INTENSITY_MAX = 0.75f;
-        public static readonly float INTENSITY_DELTA = 0.075f;
+
+        public static readonly float INTENSITY_LOADING_MAX = 1f;
+        public static readonly float INTENSITY_LOADING_DELTA = 0.5f;
+        public static readonly float INTENSITY_HOVER_MAX = 0.75f;
+        public static readonly float INTENSITY_HOVER_DELTA = 0.075f;
         public static readonly float INTENSITY_SELECTED = 1f;
-        public static readonly float INTENSITY_ACHIEVED = 60f;
-        public static readonly float INTENSITY_ACHIEVED_DELTA = 0.06f;
+        public static readonly float INTENSITY_ACHIEVED_MAX = 1f;
+        public static readonly float INTENSITY_ACHIEVED_DELTA = 0.02f;
+        public static readonly float INTENSITY_NOTIFICATION = 1f;
+        public static readonly float INTENSITY_NOTIFICATION_DELTA = 0.02f;
         public static readonly float INTENSITY_PLAYER_TURN = 0.75f;
 
         public static readonly int DRAWING_EFFECT_TIME = 40;
@@ -51,14 +56,24 @@ namespace WordBattle
 
         public static readonly int PLAYER_PANEL_WIDTH = 375;
         public static readonly int PLAYER_PANEL_HEIGHT = 100;
-        public static readonly int PANEL_COMPONENT_SPACING = 5;
+        public static readonly int PLAYER_IMAGE_WIDTH = 90;
+        public static readonly int PLAYER_IMAGE_HEIGHT = 90;
+        public static readonly int COMPONENT_SPACING = 5;
         public static readonly int PLAYER_FONT_SIZE = 36;
-        public static readonly int PLAYER_TEXT_SPACING = 1;
+        public static readonly int TEXT_SPACING = 1;
 
-        public static readonly int PLAYER1_PANEL_LEFT = 40;
-        public static readonly int PLAYER1_PANEL_TOP = 300;
+        public static readonly int PLAYER1_PANEL_LEFT = 25;
+        public static readonly int PLAYER1_PANEL_TOP = 250;
 
-        public static readonly int PLAYER2_PANEL_LEFT = 40;
-        public static readonly int PLAYER2_PANEL_TOP = 400;
+        public static readonly int PLAYER2_PANEL_LEFT = 25;
+        public static readonly int PLAYER2_PANEL_TOP = 375;
+
+        public static readonly int NOTIFICATION_LEFT = 450;
+        public static readonly int NOTIFICATION_TOP = 100;
+        public static readonly int NOTIFICATION_WIDTH = 512;
+        public static readonly int NOTIFICATION_TEXT_SIZE = 36;
+
+        public static readonly int MAX_NAME_LENGTH = WordBattleCore.Consts.MAX_NAME_LENGTH;
+        public static readonly int MAX_SCORE_DIGIT = 6;
     }
 }

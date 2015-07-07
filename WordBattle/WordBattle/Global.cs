@@ -16,9 +16,17 @@ namespace WordBattle
         public static Phase CurrentPhase;
         public static ContentManager Content;
 
-        internal static void UpdateAll(GameTime gameTime)
+        public static void UpdateAll(GameTime gameTime)
         {
             MainCamera.Update(gameTime);
+        }
+
+        public static void UpdatePhase(Phase phase)
+        {
+            CurrentPhase = phase;
+            GameNotification.GetInstance().EntityPhase = phase;
+            PlayerTurn.GetInstance().UpdatePhase(phase);
+            TilingGrid.GetInstance().EntityPhase = phase;
         }
     }
 }

@@ -9,13 +9,13 @@ namespace WordBattle.ControllerGameEntities
 {
     public class KeyboardController : ControllerEntity<KeyboardState>
     {
-        private static KeyboardController keyboardController;
+        private static KeyboardController instance;
 
         public static KeyboardController GetInstance()
         {
-            if (keyboardController == null)
-                keyboardController = new KeyboardController();
-            return keyboardController;
+            if (instance == null)
+                instance = new KeyboardController();
+            return instance;
         }
 
         private KeyboardController()
