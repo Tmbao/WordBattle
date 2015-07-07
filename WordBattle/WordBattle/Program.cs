@@ -8,12 +8,14 @@ namespace WordBattle
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        /// 
+
+        public static WordBattleGame game;
+
         static void Main(string[] args)
         {
-            using (WordBattleGame game = new WordBattleGame())
-            {
-                game.Run();
-            }
+            game = new WordBattleGame();
+            game.Run();
         }
     }
 #endif

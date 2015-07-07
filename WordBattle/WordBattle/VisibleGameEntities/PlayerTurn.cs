@@ -79,10 +79,24 @@ namespace WordBattle.VisibleGameEntities
                 case Phase.IN_GAME_END_TURN:
                     // Change turn
                     turn ^= 1;
-                    Global.UpdatePhase(Phase.IN_GAME_MOVING);
 
-                    // This is not the first move any more
-                    WordBattleCore.GridEntities.WordGrid.GetInstance().FirstMove = false;
+                    if (WordBattleCore.GridEntities.WordGrid.GetInstance().IsFinished)
+                    {
+                        if (players[0].PlayerRecord.PlayerScore > players[1].PlayerRecord.PlayerScore)
+                            GameNotification.GetInstance().PushMessage(players[0].PlayerRecord.PlayerName + " WON");
+                        else if (players[0].PlayerRecord.PlayerScore < players[1].PlayerRecord.PlayerScore)
+                            GameNotification.GetInstance().PushMessage(players[1].PlayerRecord.PlayerName + " WON");
+                        else
+                            GameNotification.GetInstance().PushMessage("DRAW");
+                        Global.UpdatePhase(Phase.END_GAME);
+                    }
+                    else
+                    {
+                        Global.UpdatePhase(Phase.IN_GAME_MOVING);
+                        // This is not the first move any more
+                        WordBattleCore.GridEntities.WordGrid.GetInstance().FirstMove = false;
+                    }
+                    
                     break;
                 case Phase.IN_GAME_MOVING:
                     CurrentPlayer.Update(gameTime);
@@ -107,6 +121,7 @@ namespace WordBattle.VisibleGameEntities
         {
             switch (Global.CurrentPhase) {
                 case Phase.IN_GAME_LOADING:
+                case Phase.END_GAME:
                 case Phase.END_GAME_ANIMATING:
                     players[0].Draw(gameTime, spriteBatch);
                     players[1].Draw(gameTime, spriteBatch);

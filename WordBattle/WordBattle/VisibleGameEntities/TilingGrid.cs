@@ -9,6 +9,7 @@ using WordBattle.Utilities;
 using WordBattleCore.GridEntities;
 using Microsoft.Xna.Framework.Input;
 using WordBattle.ControllerGameEntities;
+using Microsoft.Xna.Framework.Media;
 
 namespace WordBattle.VisibleGameEntities
 {
@@ -211,6 +212,8 @@ namespace WordBattle.VisibleGameEntities
                     achievingWords.Dequeue();
                     lastDrawnWord = drawnWord;
                     drawnWord = "";
+
+                    Global.achieveSound.Play();
                 }
 
                 // Update
@@ -292,6 +295,7 @@ namespace WordBattle.VisibleGameEntities
                        entityPhase = Phase.IN_GAME_ACHIEVING_FINISHED;
                     break;
                 case Phase.IN_GAME_MOVING:
+                case Phase.END_GAME:
                     DrawAllTilesAndEffects(gameTime, spriteBatch);
                     // Player has ended turn
                     if (selectedIndex != null && pressedCharacter != '\0')

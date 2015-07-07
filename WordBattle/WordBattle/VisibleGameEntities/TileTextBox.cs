@@ -110,7 +110,7 @@ namespace WordBattle.VisibleGameEntities
             string drawingText = text;
             while (drawingText.Length < Consts.MAX_NAME_LENGTH)
                 drawingText += Consts.BLANK;
-            tiles.DrawText(gameTime, spriteBatch, drawingText, left + Consts.TEXTBOX_TITLE_LENGTH * Consts.TEXTBOX_TEXT_WIDTH + (Consts.TEXTBOX_TITLE_LENGTH - 1) * Consts.TEXT_SPACING + 2 * Consts.COMPONENT_SPACING, top, Consts.TEXTBOX_TEXT_WIDTH, intensity);
+            tiles.DrawText(gameTime, spriteBatch, drawingText, left + Consts.TEXTBOX_TITLE_LENGTH * Consts.TEXTBOX_TEXT_WIDTH + (Consts.TEXTBOX_TITLE_LENGTH - 1) * Consts.TEXT_SPACING + 4 * Consts.COMPONENT_SPACING, top, Consts.TEXTBOX_TEXT_WIDTH, intensity);
 
             if (isFocused)
             {
@@ -118,7 +118,7 @@ namespace WordBattle.VisibleGameEntities
                 while (drawingText.Length < Consts.MAX_NAME_LENGTH)
                     drawingText += Consts.LIGHT;
 
-                tiles.DrawText(gameTime, spriteBatch, drawingText, left + Consts.TEXTBOX_TITLE_LENGTH * Consts.TEXTBOX_TEXT_WIDTH + (Consts.TEXTBOX_TITLE_LENGTH - 1) * Consts.TEXT_SPACING + 2 * Consts.COMPONENT_SPACING, top, Consts.TEXTBOX_TEXT_WIDTH, intensity);
+                tiles.DrawText(gameTime, spriteBatch, drawingText, left + Consts.TEXTBOX_TITLE_LENGTH * Consts.TEXTBOX_TEXT_WIDTH + (Consts.TEXTBOX_TITLE_LENGTH - 1) * Consts.TEXT_SPACING + 4 * Consts.COMPONENT_SPACING, top, Consts.TEXTBOX_TEXT_WIDTH, intensity);
             }
 
             

@@ -39,6 +39,8 @@ namespace WordBattleCore.GridEntities
         char[,] _grid;
         char[,] grid;
 
+        int nBlanks;
+
         public char[,] Grid
         {
             get { return grid; }
@@ -70,10 +72,14 @@ namespace WordBattleCore.GridEntities
             set { firstMove = value; }
         }
 
+        public bool IsFinished
+        {
+            get { return nBlanks == 0; }
+        }
+
         public void IntializeNewMap()
         {
-            List<Tuple<int, int>> freeCells = new List<Tuple<int, int>>();
-
+            nBlanks = 0;
             // Make a deep copy
             grid = new char[gridRows, gridCols];
             for (int row = 0; row < gridRows; row++)
@@ -81,7 +87,7 @@ namespace WordBattleCore.GridEntities
                 {
                     grid[row, col] = _grid[row, col];
                     if (grid[row, col] == Consts.BLANK)
-                        freeCells.Add(new Tuple<int, int>(row, col));
+                        nBlanks++;
                 }
             firstMove = true;
         }
@@ -145,6 +151,7 @@ namespace WordBattleCore.GridEntities
             correctedWord = new Stack<Tuple<int, int>>();
 
             Travel(index, dictionary.RootTree.ChildAt(grid[index.Item1, index.Item2]));
+            nBlanks--;
 
             return correctedWords;
         }

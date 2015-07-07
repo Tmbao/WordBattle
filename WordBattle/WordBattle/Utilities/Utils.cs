@@ -116,7 +116,7 @@ namespace WordBattle.Utilities
 
         public static int GetTextboxWidth()
         {
-            return Consts.TEXTBOX_TEXT_WIDTH * Consts.TEXTBOX_TITLE_LENGTH + (Consts.TEXTBOX_TITLE_LENGTH - 1) * Consts.TEXT_SPACING + Consts.COMPONENT_SPACING +
+            return Consts.TEXTBOX_TEXT_WIDTH * Consts.TEXTBOX_TITLE_LENGTH + (Consts.TEXTBOX_TITLE_LENGTH - 1) * Consts.TEXT_SPACING + 4 * Consts.COMPONENT_SPACING +
                 Consts.MAX_NAME_LENGTH * Consts.TEXTBOX_TEXT_WIDTH + (Consts.MAX_NAME_LENGTH - 1) * Consts.TEXT_SPACING;
         }
 

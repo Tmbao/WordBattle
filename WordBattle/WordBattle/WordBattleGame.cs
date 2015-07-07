@@ -117,7 +117,11 @@ namespace WordBattle
             backButton = new TileButton(25, 620, Utils.GetImageFileName("Back"));
             soundButton = new TileButton(70, 620, Utils.GetImageFileName("Sound"));
 
-            // Just for testing
+            // Load sound effects
+            Global.clickSound = Content.Load<SoundEffect>(@"Sound\click");
+            Global.achieveSound = Content.Load<SoundEffect>(@"Sound\achieve");
+            Global.themeSong = Content.Load<Song>(@"Sound\theme");
+
             Global.UpdatePhase(Phase.MENU_LOADING);
         }
 
@@ -162,6 +166,7 @@ namespace WordBattle
                     CheckGameLoading();
                     break;
                 case Phase.IN_GAME_MOVING:
+                case Phase.END_GAME:
                     CheckGameMoving();
                     break;
                 case Phase.IN_GAME_ACHIEVING:
@@ -188,6 +193,7 @@ namespace WordBattle
                     UpdateGameLoading(gameTime);
                     break;
                 case Phase.IN_GAME_MOVING:
+                case Phase.END_GAME:
                     UpdateGameMoving(gameTime);
                     break;
                 case Phase.IN_GAME_ACHIEVING:
@@ -262,16 +268,29 @@ namespace WordBattle
             if (tilingGrid.EntityPhase == Phase.IN_GAME_LOADING_FINISHED)
             {
                 notification.PushMessage("GO");
+                if (MediaPlayer.State == MediaState.Playing)
+                    MediaPlayer.Stop();
+                MediaPlayer.Play(Global.themeSong);
                 Global.UpdatePhase(Phase.IN_GAME_MOVING);
             }
         }
 
         private void CheckGameMoving()
         {
+            if (soundButton.IsClicked)
+            {
+                if (MediaPlayer.State == MediaState.Playing)
+                    MediaPlayer.Stop();
+                else
+                    MediaPlayer.Play(Global.themeSong);
+            }
+
             if (backButton.IsClicked)
             {
                 tilingGrid.InitializeAnimating();
                 playerTurn.InitializeAnimating();
+                if (MediaPlayer.State == MediaState.Playing)
+                    MediaPlayer.Stop();
                 Global.UpdatePhase(Phase.END_GAME_ANIMATING);
                 return;
             }
@@ -284,7 +303,6 @@ namespace WordBattle
                     var correctedWords = gridMap.GetCorrectedWords(index);
 
                     tilingGrid.AchieveWords(correctedWords);
-
                     break;
             }
         }
@@ -292,7 +310,13 @@ namespace WordBattle
         private void CheckGameAchieving(GameTime gameTime)
         {
             // Add update logic here
-
+            if (soundButton.IsClicked)
+            {
+                if (MediaPlayer.State == MediaState.Playing)
+                    MediaPlayer.Stop();
+                else
+                    MediaPlayer.Play(Global.themeSong);
+            }
             // Update score
             if (tilingGrid.LastDrawnWord.Length > 0)
             {
@@ -381,6 +405,7 @@ namespace WordBattle
             playerTurn.Update(gameTime);
             tilingGrid.Update(gameTime);
             backButton.Update(gameTime);
+            soundButton.Update(gameTime);
         }
 
         private void UpdateGameAchieving(GameTime gameTime)
@@ -388,6 +413,7 @@ namespace WordBattle
             tilingGrid.Update(gameTime);
             playerTurn.Update(gameTime);
             notification.Update(gameTime);
+            soundButton.Update(gameTime);
         }
 
         /// <summary>
@@ -416,15 +442,15 @@ namespace WordBattle
                     logoPanel.Draw(gameTime, spriteBatch);
                     background.Draw(gameTime, spriteBatch);
                     menuContainer.Draw(gameTime, spriteBatch);
-
-                    if (Global.CurrentPhase == Phase.MENU)
-                        backButton.Draw(gameTime, spriteBatch);
+                    backButton.Draw(gameTime, spriteBatch);
 
                     spriteBatch.End();
                     break;
+
                 case Phase.IN_GAME_LOADING:
                 case Phase.IN_GAME_MOVING:
                 case Phase.IN_GAME_ACHIEVING:
+                case Phase.END_GAME:
                 case Phase.END_GAME_ANIMATING:
                     spriteBatch.Begin(
                         SpriteSortMode.BackToFront,
@@ -441,9 +467,12 @@ namespace WordBattle
                     playerTurn.Draw(gameTime, spriteBatch);
                     tilingGrid.Draw(gameTime, spriteBatch);
                     notification.Draw(gameTime, spriteBatch);
+                    backButton.Draw(gameTime, spriteBatch);
 
-                    if (Global.CurrentPhase == Phase.IN_GAME_MOVING)
-                        backButton.Draw(gameTime, spriteBatch);
+                    if (Global.CurrentPhase == Phase.IN_GAME_MOVING ||
+                        Global.CurrentPhase == Phase.IN_GAME_ACHIEVING ||
+                        Global.CurrentPhase == Phase.END_GAME)
+                        soundButton.Draw(gameTime, spriteBatch);
 
                     spriteBatch.End();
                     break;

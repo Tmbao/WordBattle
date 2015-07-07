@@ -7,6 +7,8 @@ using Microsoft.Xna.Framework.Content;
 using WordBattle.InvisibleGameEntities;
 using Microsoft.Xna.Framework;
 using WordBattle.VisibleGameEntities;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 
 namespace WordBattle
 {
@@ -15,6 +17,10 @@ namespace WordBattle
         public static Camera MainCamera = new Camera();
         public static Phase CurrentPhase;
         public static ContentManager Content;
+
+        public static SoundEffect clickSound;
+        public static SoundEffect achieveSound;
+        public static Song themeSong;
 
         public static void UpdateAll(GameTime gameTime)
         {

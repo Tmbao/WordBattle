@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 
 namespace WordBattle.ControllerGameEntities
 {
@@ -24,14 +25,20 @@ namespace WordBattle.ControllerGameEntities
 
         public override void Update(GameTime gameTime)
         {
-            // The mouse has been already updated
-            if (lastUpdate == gameTime.TotalGameTime.Milliseconds)
-                return;
+            if (Program.game.IsActive)
+            {
+                // The mouse has been already updated
+                if (lastUpdate == gameTime.TotalGameTime.Milliseconds)
+                    return;
 
-            lastUpdate = gameTime.TotalGameTime.Milliseconds;
+                lastUpdate = gameTime.TotalGameTime.Milliseconds;
 
-            base.Update(gameTime);
-            currentState = Mouse.GetState();
+                base.Update(gameTime);
+                currentState = Mouse.GetState();
+
+                if (IsLeftButtonPressed())
+                    Global.clickSound.Play();
+            }
         }
 
         public Vector2 GetCurrentMousePosition()

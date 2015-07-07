@@ -24,22 +24,28 @@ namespace WordBattle.ControllerGameEntities
 
         public override void Update(GameTime gameTime)
         {
-            // The keyboard has already updated
-            if (lastUpdate == gameTime.TotalGameTime.Milliseconds)
-                return;
-
-            lastUpdate = gameTime.TotalGameTime.Milliseconds;
-
-            base.Update(gameTime);
-            
-            currentState = Keyboard.GetState();
-
-            var pressedKeys = currentState.GetPressedKeys();
-            pressedKey = Keys.None;
-            foreach (var key in pressedKeys)
+            if (Program.game.IsActive)
             {
-                if (IsKeyPressed(key))
-                    pressedKey = key;
+                // The keyboard has already updated
+                if (lastUpdate == gameTime.TotalGameTime.Milliseconds)
+                    return;
+
+                lastUpdate = gameTime.TotalGameTime.Milliseconds;
+
+                base.Update(gameTime);
+
+                currentState = Keyboard.GetState();
+
+                var pressedKeys = currentState.GetPressedKeys();
+                pressedKey = Keys.None;
+                foreach (var key in pressedKeys)
+                {
+                    if (IsKeyPressed(key))
+                        pressedKey = key;
+                }
+
+                if (pressedKey != Keys.None)
+                    Global.clickSound.Play();
             }
         }
 

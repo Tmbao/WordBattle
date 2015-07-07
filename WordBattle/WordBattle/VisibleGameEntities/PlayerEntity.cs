@@ -212,6 +212,7 @@ namespace WordBattle.VisibleGameEntities
                 case Phase.IN_GAME_ACHIEVING:
                 case Phase.IN_GAME_ACHIEVING_FINISHED:
                 case Phase.IN_GAME_LOADING_FINISHED:
+                case Phase.END_GAME:
                     DrawPlayerImage(gameTime, spriteBatch);
                     DrawPlayerName(gameTime, spriteBatch);
                     DrawPlayerScore(gameTime, spriteBatch);
