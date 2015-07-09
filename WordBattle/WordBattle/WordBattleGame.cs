@@ -368,7 +368,7 @@ namespace WordBattle
                         Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
                         Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
                         p1Name, "Single");
-                    p1.PlayerController = PlayerGameController.GetInstance();
+                    p1.PlayerController = new RandomAIPlayer();//PlayerGameController.GetInstance();
                     p2 = new PlayerEntity(
                         Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP, 
                         Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT, 
