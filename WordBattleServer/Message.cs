@@ -6,8 +6,16 @@ using Newtonsoft.Json.Linq;
 
 namespace WordBattleServer
 {
-    class Message
+    public class Message
     {
+        string name;
+
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+
         string roomId;
 
         public string RoomId
@@ -49,6 +57,7 @@ namespace WordBattleServer
         public Message(string jsonString)
         {
             var jToken = JObject.Parse(jsonString);
+            name = (string)jToken.SelectToken("Name");
             roomId = (string)jToken.SelectToken("RoomID");
             col = int.Parse((string)jToken.SelectToken("Column"));
             row = int.Parse((string)jToken.SelectToken("Row"));
@@ -64,10 +73,11 @@ namespace WordBattleServer
         public string ToJSON()
         {
             var jObject = new JObject();
+            jObject.Add("Name", name);
             jObject.Add("RoomID", roomId);
             jObject.Add("Column", col);
             jObject.Add("Row", row);
-            jObject.Add("Value", value);
+            jObject.Add("Value", value.ToString());
             jObject.Add("Turn", turn);
             return jObject.ToString();
         }

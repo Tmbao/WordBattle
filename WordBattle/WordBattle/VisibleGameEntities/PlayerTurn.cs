@@ -90,7 +90,7 @@ namespace WordBattle.VisibleGameEntities
                         else
                             GameNotification.GetInstance().PushMessage("DRAW");
 
-                        PlayerGameControllerOnline.SendMessage(new PlayerGameControllerOnline.Message { Turn = -2 });
+                        PlayerGameControllerOnline.SendMessage(new PlayerGameControllerOnline.Message { RoomId=PlayerGameControllerOnline.RoomId, Turn = -2 });
 
                         Global.UpdatePhase(Phase.END_GAME);
                     }

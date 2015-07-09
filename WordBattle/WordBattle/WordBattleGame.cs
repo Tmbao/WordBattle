@@ -287,6 +287,10 @@ namespace WordBattle
 
             if (backButton.IsClicked)
             {
+                if (gameMode == GameMode.NETWORK)
+                {
+                    PlayerGameControllerOnline.SendMessage(new PlayerGameControllerOnline.Message { RoomId=roomName, Turn = -2 });
+                }
                 tilingGrid.InitializeAnimating();
                 playerTurn.InitializeAnimating();
                 if (MediaPlayer.State == MediaState.Playing)
@@ -387,6 +391,7 @@ namespace WordBattle
 
                 case GameMode.NETWORK:
                     PlayerGameControllerOnline.RoomId = roomName;
+                    PlayerGameControllerOnline.MyName = p1Name;
                     PlayerGameControllerOnline.Connect();
 
                     int myTurn = PlayerGameControllerOnline.Turn;
@@ -395,12 +400,12 @@ namespace WordBattle
                         p1 = new PlayerEntity(
                             Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
                             Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
-                            p1Name, "Single");
+                            PlayerGameControllerOnline.MyName, "Single");
                         p1.PlayerController = PlayerGameControllerOnline.GetInstance(ControllerOwner.ME);
                         p2 = new PlayerEntity(
                             Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
                             Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
-                            "OPPONENT", "Single");
+                            PlayerGameControllerOnline.OpName, "Single");
                         p2.PlayerController = PlayerGameControllerOnline.GetInstance(ControllerOwner.OPPONENT);
                     }
                     else if (myTurn == 1)
@@ -408,12 +413,12 @@ namespace WordBattle
                         p2 = new PlayerEntity(
                             Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
                             Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
-                            p1Name, "Single");
+                            PlayerGameControllerOnline.MyName, "Single");
                         p2.PlayerController = PlayerGameControllerOnline.GetInstance(ControllerOwner.ME);
                         p1 = new PlayerEntity(
                             Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
                             Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
-                            "OPPONENT", "Single");
+                            PlayerGameControllerOnline.OpName, "Single");
                         p1.PlayerController = PlayerGameControllerOnline.GetInstance(ControllerOwner.OPPONENT);
                     }
 

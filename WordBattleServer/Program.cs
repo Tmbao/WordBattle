@@ -27,7 +27,7 @@ namespace WordBattleServer
                 var ipHost = Dns.GetHostEntry("");
 
                 // Gets first IP address associated with a localhost 
-                IPAddress ipAddr = ipHost.AddressList[2];
+                IPAddress ipAddr = ipHost.AddressList[3];
 
                 // Creates a network endpoint 
                 var ipEndPoint = new IPEndPoint(ipAddr, PORT);
@@ -97,7 +97,7 @@ namespace WordBattleServer
                     );
 
                 // Begins an asynchronous operation to accept an attempt 
-                var callback = new AsyncCallback(ReceiveCallback);
+                var callback = new AsyncCallback(AcceptCallback);
                 listener.BeginAccept(callback, listener);
 
             }
@@ -133,13 +133,13 @@ namespace WordBattleServer
                         // Check if room is full or not
                         if (room.Count < 2)
                         {
-                            room.Add(handler);
+                            room.Add(handler, message.Name);
 
                             // Send to the client the player turn
                             if (room.Count == 2)
                             {
                                 for (int index = 0; index < room.Count; index++)
-                                    SendMessage(room[index], new Message { Turn = index });
+                                    SendMessage(room.GetSocket(index), new Message { Turn = index, Name=room.GetName(index ^ 1) });
                             }
                         }
                         else
@@ -170,7 +170,7 @@ namespace WordBattleServer
                             SendMessage(handler, message);
 
                             for (int index = 0; index < room.Count; index++)
-                                SendMessage(room[index], message);
+                                SendMessage(room.GetSocket(index), message);
                             room.Clear();
                         }
 
@@ -186,7 +186,7 @@ namespace WordBattleServer
                         if (room.Count == 2)
                         {
                             // Send the message to the other
-                            SendMessage(room[message.Turn ^ 1], message);
+                            SendMessage(room.GetSocket(message.Turn ^ 1), message);
                         }
 
                         rooms.AddOrUpdate(message.RoomId, room, (key, existing) =>
@@ -218,7 +218,6 @@ namespace WordBattleServer
             {
                 // Prepare the reply message 
                 var byteData = Encoding.Unicode.GetBytes(message.ToJSON());
-
                 handler.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), handler);
             }
             catch (Exception e)
@@ -236,7 +235,10 @@ namespace WordBattleServer
 
                 // The number of bytes sent to the Socket 
                 int bytesSend = handler.EndSend(ar);
+
                 Console.WriteLine("Sent {0} bytes to Client", bytesSend);
+
+                // handler.EndReceive(ar);
             }
             catch (Exception e)
             {

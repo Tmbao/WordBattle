@@ -11,6 +11,7 @@ using System.Net.Sockets;
 using Newtonsoft.Json.Linq;
 using WordBattle.VisibleGameEntities;
 using WordBattlePlayer;
+using System.Threading.Tasks;
 
 namespace WordBattle.ControllerGameEntities
 {
@@ -48,6 +49,14 @@ namespace WordBattle.ControllerGameEntities
         // 
         public class Message
         {
+            string name;
+
+            public string Name
+            {
+                get { return name; }
+                set { name = value; }
+            }
+
             string roomId;
 
             public string RoomId
@@ -89,6 +98,7 @@ namespace WordBattle.ControllerGameEntities
             public Message(string jsonString)
             {
                 var jToken = JObject.Parse(jsonString);
+                name = (string)jToken.SelectToken("Name");
                 roomId = (string)jToken.SelectToken("RoomID");
                 col = int.Parse((string)jToken.SelectToken("Column"));
                 row = int.Parse((string)jToken.SelectToken("Row"));
@@ -104,10 +114,11 @@ namespace WordBattle.ControllerGameEntities
             public string ToJSON()
             {
                 var jObject = new JObject();
+                jObject.Add("Name", name);
                 jObject.Add("RoomID", roomId);
                 jObject.Add("Column", col);
                 jObject.Add("Row", row);
-                jObject.Add("Value", value);
+                jObject.Add("Value", value.ToString());
                 jObject.Add("Turn", turn);
                 return jObject.ToString();
             }
@@ -123,6 +134,22 @@ namespace WordBattle.ControllerGameEntities
             set { PlayerGameControllerOnline.roomId = value; }
         }
 
+        static string myName;
+
+        public static string MyName
+        {
+            get { return PlayerGameControllerOnline.myName; }
+            set { PlayerGameControllerOnline.myName = value; }
+        }
+
+        static string opName;
+
+        public static string OpName
+        {
+            get { return PlayerGameControllerOnline.opName; }
+            set { PlayerGameControllerOnline.opName = value; }
+        }
+
         static int turn;
 
         public static int Turn
@@ -136,6 +163,8 @@ namespace WordBattle.ControllerGameEntities
             keyboardController = KeyboardController.GetInstance();
             mouseController = MouseController.GetInstance();
         }
+
+        static Task receiveMoveTask = null;
 
         public static void Connect()
         {
@@ -161,7 +190,7 @@ namespace WordBattle.ControllerGameEntities
                 var ipHost = Dns.GetHostEntry(Consts.SERVER_IP);
 
                 // Gets first IP address associated with a localhost 
-                var ipAddr = ipHost.AddressList[2];
+                var ipAddr = IPAddress.Parse("192.168.56.1"); //ipHost.AddressList[3];
 
                 // Creates a network endpoint 
                 IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, Consts.PORT);
@@ -190,11 +219,14 @@ namespace WordBattle.ControllerGameEntities
                 {
                     GameNotification.GetInstance().PushMessage("Connected");
                     // Update player turn
-                    SendMessage(new Message { RoomId = roomId, Turn = -1 });
+                    SendMessage(new Message { Name = myName, RoomId = roomId, Turn = -1 });
                     var message = ReceiveMessage();
 
                     if (message.Turn >= 0)
+                    {
                         turn = message.Turn;
+                        opName = message.Name;
+                    }
                     else
                     {
                         Disconnect();
@@ -269,27 +301,37 @@ namespace WordBattle.ControllerGameEntities
             }
             else if (senderSock.Connected)
             {
+                if (receiveMoveTask == null || receiveMoveTask.Status != TaskStatus.Running)
+                {
+                    receiveMoveTask = new Task((Action)ReceiveMove);
+                    receiveMoveTask.Start();
+                }
+            }
+        }
+
+        private void ReceiveMove()
+        {
+            // Update from server
+            try
+            {
                 selectedIndex = null;
                 pressedCharacter = null;
-                // Update from server
-                try
-                {
-                    Message message = ReceiveMessage();
 
-                    if (message.Turn > 0)
-                    {
-                        selectedIndex = new Tuple<int, int>(message.Row, message.Col);
-                        pressedCharacter = message.Value.ToString().ToUpper();
-                    }
-                    else
-                    {
-                        // Quit ??
-                        Disconnect();
-                    }
-                }
-                catch (Exception e) 
+                Message message = ReceiveMessage();
+
+                if (message.Turn >= 0)
                 {
+                    selectedIndex = new Tuple<int, int>(message.Row, message.Col);
+                    pressedCharacter = message.Value.ToString().ToUpper();
                 }
+                else
+                {
+                    // Quit ??
+                    Disconnect();
+                }
+            }
+            catch (Exception e)
+            {
             }
         }
 
