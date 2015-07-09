@@ -8,7 +8,7 @@ namespace WordBattlePlayer
 {
     public abstract class GameController
     {
-        public abstract string PressedCharacters();
+        public abstract string PressedCharacter();
 
         public abstract Tuple<int, int> SelectedIndex();
 

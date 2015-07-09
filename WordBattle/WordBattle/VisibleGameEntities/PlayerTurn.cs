@@ -6,6 +6,7 @@ using WordBattle.VisibleGameEntities;
 using WordBattle.InvisibleGameEntities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using WordBattle.ControllerGameEntities;
 
 namespace WordBattle.VisibleGameEntities
 {
@@ -88,6 +89,9 @@ namespace WordBattle.VisibleGameEntities
                             GameNotification.GetInstance().PushMessage(players[1].PlayerRecord.PlayerName + " WON");
                         else
                             GameNotification.GetInstance().PushMessage("DRAW");
+
+                        PlayerGameControllerOnline.SendMessage(new PlayerGameControllerOnline.Message { Turn = -2 });
+
                         Global.UpdatePhase(Phase.END_GAME);
                     }
                     else

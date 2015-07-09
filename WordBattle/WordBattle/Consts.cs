@@ -14,6 +14,10 @@ namespace WordBattle
 
         public static readonly string DEFAULT_DICTIONARY_NAME = "English";
 
+        public static readonly string SERVER_IP = "";
+        public static readonly int PORT = 4510;
+        public static readonly int MAX_CONNECTION_ATTEMPTS = 5;
+
         public static readonly int SCREEN_WIDTH = 1000;
         public static readonly int SCREEN_HEIGHT = 700;
 

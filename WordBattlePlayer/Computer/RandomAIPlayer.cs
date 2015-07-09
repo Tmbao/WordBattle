@@ -20,7 +20,7 @@ namespace WordBattlePlayer.Computer
             rand = new Random();
         }
 
-        public override string PressedCharacters()
+        public override string PressedCharacter()
         {
             return pressedCharaceter;
         }

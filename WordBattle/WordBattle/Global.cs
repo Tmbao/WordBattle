@@ -30,7 +30,6 @@ namespace WordBattle
         public static void UpdatePhase(Phase phase)
         {
             CurrentPhase = phase;
-            GameNotification.GetInstance().EntityPhase = phase;
             PlayerTurn.GetInstance().UpdatePhase(phase);
             TilingGrid.GetInstance().EntityPhase = phase;
             MenuContainer.GetInstance().UpdatePhase(phase);

@@ -58,6 +58,10 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <PlatformTarget>x86</PlatformTarget>
     <XnaCompressContent>true</XnaCompressContent>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
@@ -90,6 +94,10 @@
     <Reference Include="mscorlib">
       <Private>False</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Utilities\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
@@ -111,6 +119,7 @@
     <Compile Include="ControllerGameEntities\KeyboardController.cs" />
     <Compile Include="ControllerGameEntities\MouseController.cs" />
     <Compile Include="ControllerGameEntities\PlayerGameController.cs" />
+    <Compile Include="ControllerGameEntities\PlayerGameControllerOnline.cs" />
     <Compile Include="GameEntity.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="InvisibleGameEntities\Camera.cs" />

@@ -329,7 +329,6 @@ namespace WordBattle
 
             // Finished presenting achieved words
             if (tilingGrid.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED &&
-                notification.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED &&
                 playerTurn.CurrentPlayer.EntityPhase == Phase.IN_GAME_ACHIEVING_FINISHED)
             {
                 Global.CurrentPhase = Phase.IN_GAME_END_TURN;
@@ -341,6 +340,7 @@ namespace WordBattle
         {
             menuContainer.Update(gameTime);
             logoPanel.Update(gameTime);
+            notification.Update(gameTime);
 
             if (Global.CurrentPhase == Phase.MENU)
                 backButton.Update(gameTime);
@@ -355,18 +355,16 @@ namespace WordBattle
                 Consts.GRID_LEFT, Consts.GRID_TOP,
                 Consts.TILE_WIDTH, Consts.TILE_HEIGHT);
 
-            // Just for testing
-            var p1 = new PlayerEntity(
-                Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
-                Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
-                p1Name, "Single");
-            p1.PlayerController = PlayerGameController.GetInstance();
-
-            PlayerEntity p2;
+            PlayerEntity p1 = null, p2 = null;
 
             switch (gameMode)
             {
                 case GameMode.SINGLE:
+                    p1 = new PlayerEntity(
+                        Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
+                        Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
+                        p1Name, "Single");
+                    p1.PlayerController = PlayerGameController.GetInstance();
                     p2 = new PlayerEntity(
                         Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP, 
                         Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT, 
@@ -375,15 +373,54 @@ namespace WordBattle
                     break;
 
                 case GameMode.MULTI:
-                case GameMode.NETWORK:
-                default:
-                    // Online mode is under construction
+                    p1 = new PlayerEntity(
+                        Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
+                        Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
+                        p1Name, "Single");
+                    p1.PlayerController = PlayerGameController.GetInstance();
                     p2 = new PlayerEntity(
                         Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
                         Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
                         p2Name, "Single");
                     p2.PlayerController = PlayerGameController.GetInstance();
+                    break;
 
+                case GameMode.NETWORK:
+                    PlayerGameControllerOnline.RoomId = roomName;
+                    PlayerGameControllerOnline.Connect();
+
+                    int myTurn = PlayerGameControllerOnline.Turn;
+                    if (myTurn == 0)
+                    {
+                        p1 = new PlayerEntity(
+                            Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
+                            Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
+                            p1Name, "Single");
+                        p1.PlayerController = PlayerGameControllerOnline.GetInstance(ControllerOwner.ME);
+                        p2 = new PlayerEntity(
+                            Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
+                            Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
+                            "OPPONENT", "Single");
+                        p2.PlayerController = PlayerGameControllerOnline.GetInstance(ControllerOwner.OPPONENT);
+                    }
+                    else if (myTurn == 1)
+                    {
+                        p2 = new PlayerEntity(
+                            Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
+                            Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
+                            p1Name, "Single");
+                        p2.PlayerController = PlayerGameControllerOnline.GetInstance(ControllerOwner.ME);
+                        p1 = new PlayerEntity(
+                            Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP,
+                            Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
+                            "OPPONENT", "Single");
+                        p1.PlayerController = PlayerGameControllerOnline.GetInstance(ControllerOwner.OPPONENT);
+                    }
+
+                    // Online mode is under construction
+                    break;
+
+                default:
                     break;
             }
 
@@ -442,6 +479,7 @@ namespace WordBattle
                     logoPanel.Draw(gameTime, spriteBatch);
                     background.Draw(gameTime, spriteBatch);
                     menuContainer.Draw(gameTime, spriteBatch);
+                    notification.Draw(gameTime, spriteBatch);
                     backButton.Draw(gameTime, spriteBatch);
 
                     spriteBatch.End();

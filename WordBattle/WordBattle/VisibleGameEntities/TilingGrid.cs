@@ -239,10 +239,10 @@ namespace WordBattle.VisibleGameEntities
 
         private void UpdateKeyboard()
         {
-            var pressedKeyCode = PlayerTurn.GetInstance().CurrentPlayer.PlayerController.PressedCharacters();
+            var pressedKeyCode = PlayerTurn.GetInstance().CurrentPlayer.PlayerController.PressedCharacter();
             pressedCharacter = '\0';
             // The pressed key is a character
-            if (pressedKeyCode != null && pressedKeyCode.Length == 1 && Utils.IsLetter(pressedKeyCode[0]))
+            if (pressedKeyCode != null)
             {
                 // Set the character at selected index
                 if (selectedIndex != null)

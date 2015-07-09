@@ -7,6 +7,7 @@ using WordBattleCore.GridEntities;
 using WordBattle.Utilities;
 using Microsoft.Xna.Framework.Input;
 using WordBattlePlayer;
+using System.Net;
 
 namespace WordBattle.ControllerGameEntities
 {
@@ -49,16 +50,21 @@ namespace WordBattle.ControllerGameEntities
         {
             var pressedKey = keyboardController.PressedKey;
             if (pressedKey != Keys.None)
-                pressedCharacters = pressedKey.ToString();
+            {
+                pressedCharacter = pressedKey.ToString();
+                if (pressedCharacter != null && pressedCharacter.Length == 1 && Utils.IsLetter(pressedCharacter[0])) ;
+                else
+                    pressedCharacter = null;
+            }
             else
-                pressedCharacters = null;
+                pressedCharacter = null;
         }
 
-        string pressedCharacters;
+        string pressedCharacter;
 
-        public override string PressedCharacters()
+        public override string PressedCharacter()
         {
-            return pressedCharacters;
+            return pressedCharacter;
         }
 
         Tuple<int, int> selectedIndex;

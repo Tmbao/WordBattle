@@ -24,26 +24,15 @@ namespace WordBattle.VisibleGameEntities
         {
             messages = new List<string>();
             intensity = new List<float>();
-            entityPhase = Phase.IN_GAME_ACHIEVING_FINISHED;
         }
 
         List<string> messages;
         List<float> intensity;
 
-        Phase entityPhase;
-
-        public Phase EntityPhase
-        {
-            get { return entityPhase; }
-            set { entityPhase = value; }
-        }
-
         public void PushMessage(string message)
         {
             messages.Add(message.ToUpper());
             intensity.Add(Consts.INTENSITY_NOTIFICATION + Consts.INTENSITY_NOTIFICATION_DELTA);
-
-            entityPhase = Phase.IN_GAME_ACHIEVING;
         }
 
         public override void Update(GameTime gameTime)
@@ -102,17 +91,11 @@ namespace WordBattle.VisibleGameEntities
                 }
             }
 
-            switch (entityPhase)
+            // Finish drawing notification
+            if (IsIntensityAllZeros())
             {
-                case Phase.IN_GAME_ACHIEVING:
-                    // Finish drawing notification
-                    if (IsIntensityAllZeros())
-                    {
-                        entityPhase = Phase.IN_GAME_ACHIEVING_FINISHED;
-                        messages.Clear();
-                        intensity.Clear();
-                    }
-                    break;
+                messages.Clear();
+                intensity.Clear();
             }
         }
 
