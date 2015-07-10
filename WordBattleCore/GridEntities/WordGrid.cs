@@ -60,8 +60,8 @@ namespace WordBattleCore.GridEntities
                 for (int col = 0; col < gridCols; col++)
                     _grid[row, col] = Consts.BLANK;
 
-            for (int index = 0; index < gridData.Obstacle.Count; index++)
-                _grid[gridData.Obstacle[index].Item1, gridData.Obstacle[index].Item2] = Consts.OBSTACLE;
+            for (int index = 0; index < gridData.NumberOfObstacles; index++)
+                _grid[gridData.ObstacleAt(index).Item1, gridData.ObstacleAt(index).Item2] = Consts.OBSTACLE;
         }
 
         bool firstMove;
@@ -116,7 +116,7 @@ namespace WordBattleCore.GridEntities
             }
         }
 
-        private bool IsInside(Tuple<int, int> index)
+        public bool IsInside(Tuple<int, int> index)
         {
             return 0 <= index.Item1 && index.Item1 < gridRows && 0 <= index.Item2 && index.Item2 < gridCols;
         }

@@ -11,6 +11,9 @@ namespace WordBattle
         public static readonly string ContentDirectory = "Content";
 
         public static readonly string DEFALT_MAP_NAME = "Default";
+        public static readonly int NUMBER_OF_CUSTOM_MAPS = 2;
+
+        public static readonly int NUMBER_OF_AIS = 2;
 
         public static readonly string DEFAULT_DICTIONARY_NAME = "English";
 

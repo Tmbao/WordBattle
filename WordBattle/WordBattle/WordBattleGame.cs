@@ -45,6 +45,8 @@ namespace WordBattle
 
         TileButton backButton, soundButton;
 
+        Random rand;
+
         string p1Name, p2Name, roomName;
 
         public WordBattleGame()
@@ -58,6 +60,8 @@ namespace WordBattle
             graphics.PreferredBackBufferWidth = Consts.SCREEN_WIDTH;
             graphics.PreferredBackBufferHeight = Consts.SCREEN_HEIGHT;
             graphics.ApplyChanges();
+
+            rand = new Random();
         }
 
         /// <summary>
@@ -71,6 +75,7 @@ namespace WordBattle
             // TODO: Add your initialization logic here
 
             base.Initialize();
+
         }
 
         /// <summary>
@@ -91,7 +96,7 @@ namespace WordBattle
 
             // Initialize map
             gridMap = WordGrid.GetInstance();
-            gridMap.Load(Content.Load<GridData>(Utils.GetMapFileName(Consts.DEFALT_MAP_NAME)));
+            //gridMap.Load(Content.Load<GridData>(Utils.GetMapFileName(Consts.DEFALT_MAP_NAME)));
 
             // Initialize dictionary
             dictionary = TrieDictionary.GetInstance();
@@ -352,6 +357,10 @@ namespace WordBattle
 
         private void CreateNewGame()
         {
+            // Load an arbitrary map
+            int mapId = rand.Next(Consts.NUMBER_OF_CUSTOM_MAPS);
+            gridMap.Load(Content.Load<GridData>(Utils.GetMapFileName(mapId.ToString())));
+
             gridMap.IntializeNewMap();
 
             tilingGrid = TilingGrid.GetInstance();
@@ -368,12 +377,12 @@ namespace WordBattle
                         Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
                         Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
                         p1Name, "Single");
-                    p1.PlayerController = new RandomAIPlayer();//PlayerGameController.GetInstance();
+                    p1.PlayerController = PlayerGameController.GetInstance();
                     p2 = new PlayerEntity(
                         Consts.PLAYER2_PANEL_LEFT, Consts.PLAYER2_PANEL_TOP, 
                         Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT, 
                         "COMPUTER", "AI");
-                    p2.PlayerController = new RandomAIPlayer();
+                    p2.PlayerController = GetAIPlayer(rand.Next(Consts.NUMBER_OF_AIS));
                     break;
 
                 case GameMode.MULTI:
@@ -431,6 +440,19 @@ namespace WordBattle
 
             playerTurn = PlayerTurn.GetInstance();
             playerTurn.NewGame(p1, p2, 0);
+        }
+
+        private WordBattlePlayer.GameController GetAIPlayer(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return new RandomAIPlayer();
+                case 1:
+                    return new RandomVowelAIPlayer();
+                default:
+                    return null;
+            }
         }
 
         private void UpdateGameLoading(GameTime gameTime)

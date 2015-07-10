@@ -21,12 +21,31 @@ namespace WordBattleCore.GridEntities
             set { gridCols = value; }
         }
 
-        List<Tuple<int, int>> obstacle;
+        int nObstacles;
 
-        public List<Tuple<int, int>> Obstacle
+        public int NumberOfObstacles
         {
-            get { return obstacle; }
-            set { obstacle = value; }
+            get { return nObstacles; }
+            set { nObstacles = value; }
+        }
+
+        int[] obstacleCol, obstacleRow;
+
+        public int[] ObstacleRow
+        {
+            get { return obstacleRow; }
+            set { obstacleRow = value; }
+        }
+
+        public int[] ObstacleColumn
+        {
+            get { return obstacleCol; }
+            set { obstacleCol = value; }
+        }
+
+        public Tuple<int, int> ObstacleAt(int index)
+        {
+            return new Tuple<int, int>(obstacleRow[index], obstacleCol[index]);
         }
     }
 }

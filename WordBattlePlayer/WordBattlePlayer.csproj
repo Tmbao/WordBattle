@@ -93,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Computer\RandomAIPlayer.cs" />
+    <Compile Include="Computer\RandomVowelAIPlayer.cs" />
     <Compile Include="GameController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

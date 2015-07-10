@@ -4,8 +4,8 @@
   <Asset Type="WordBattleCore.GridEntities.GridData">
     <NumberOfRows>8</NumberOfRows>
     <NumberOfColumns>8</NumberOfColumns>
-    <NumberOfObstacles>0</NumberOfObstacles>
-    <ObstacleRow></ObstacleRow>
-    <ObstacleColumn></ObstacleColumn>
+    <NumberOfObstacles>4</NumberOfObstacles>
+    <ObstacleRow>0 2 4 6</ObstacleRow>
+    <ObstacleColumn>0 2 4 6</ObstacleColumn>
   </Asset>
 </XnaContent>
