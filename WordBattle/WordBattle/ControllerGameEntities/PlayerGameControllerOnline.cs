@@ -158,6 +158,14 @@ namespace WordBattle.ControllerGameEntities
             private set { turn = value; }
         }
 
+        static int mapId;
+
+        public static int MapId
+        {
+            get { return PlayerGameControllerOnline.mapId; }
+            set { PlayerGameControllerOnline.mapId = value; }
+        }
+
         private PlayerGameControllerOnline()
         {
             keyboardController = KeyboardController.GetInstance();
@@ -226,6 +234,7 @@ namespace WordBattle.ControllerGameEntities
                     {
                         turn = message.Turn;
                         opName = message.Name;
+                        mapId = message.Col;
                     }
                     else
                     {

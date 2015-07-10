@@ -18,6 +18,7 @@ namespace WordBattleServer
         static ConcurrentDictionary<string, Room> rooms = new ConcurrentDictionary<string, Room>();
 
         static byte[] buffer = new byte[1024];
+        static Random rand = new Random();
 
         static void Main(string[] args)
         {
@@ -138,8 +139,13 @@ namespace WordBattleServer
                             // Send to the client the player turn
                             if (room.Count == 2)
                             {
+                                int mapId = rand.Next(2);
                                 for (int index = 0; index < room.Count; index++)
-                                    SendMessage(room.GetSocket(index), new Message { Turn = index, Name=room.GetName(index ^ 1) });
+                                    SendMessage(room.GetSocket(index), new Message { 
+                                        Turn = index, 
+                                        Name=room.GetName(index ^ 1), 
+                                        Col = mapId
+                                    });
                             }
                         }
                         else

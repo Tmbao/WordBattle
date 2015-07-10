@@ -39,12 +39,10 @@ namespace WordBattle
         MouseController mouseController;
         KeyboardController keyboardController;
 
-        GameMode gameMode;
-
         CustomCusor cursor;
-
         TileButton backButton, soundButton;
 
+        GameMode gameMode;
         Random rand;
 
         string p1Name, p2Name, roomName;
@@ -357,22 +355,24 @@ namespace WordBattle
 
         private void CreateNewGame()
         {
-            // Load an arbitrary map
-            int mapId = rand.Next(Consts.NUMBER_OF_CUSTOM_MAPS);
-            gridMap.Load(Content.Load<GridData>(Utils.GetMapFileName(mapId.ToString())));
-
-            gridMap.IntializeNewMap();
-
             tilingGrid = TilingGrid.GetInstance();
-            tilingGrid.Load(
-                Consts.GRID_LEFT, Consts.GRID_TOP,
-                Consts.TILE_WIDTH, Consts.TILE_HEIGHT);
 
             PlayerEntity p1 = null, p2 = null;
+
+            int mapId;
 
             switch (gameMode)
             {
                 case GameMode.SINGLE:
+                    // Load an arbitrary map
+                    mapId = rand.Next(Consts.NUMBER_OF_CUSTOM_MAPS);
+                    gridMap.Load(Content.Load<GridData>(Utils.GetMapFileName(mapId.ToString())));
+
+                    gridMap.IntializeNewMap();
+                    tilingGrid.Load(
+                        Consts.GRID_LEFT, Consts.GRID_TOP,
+                        Consts.TILE_WIDTH, Consts.TILE_HEIGHT);
+
                     p1 = new PlayerEntity(
                         Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
                         Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
@@ -386,6 +386,15 @@ namespace WordBattle
                     break;
 
                 case GameMode.MULTI:
+                    // Load an arbitrary map
+                    mapId = rand.Next(Consts.NUMBER_OF_CUSTOM_MAPS);
+                    gridMap.Load(Content.Load<GridData>(Utils.GetMapFileName(mapId.ToString())));
+
+                    gridMap.IntializeNewMap();
+                    tilingGrid.Load(
+                        Consts.GRID_LEFT, Consts.GRID_TOP,
+                        Consts.TILE_WIDTH, Consts.TILE_HEIGHT);
+
                     p1 = new PlayerEntity(
                         Consts.PLAYER1_PANEL_LEFT, Consts.PLAYER1_PANEL_TOP,
                         Consts.PLAYER_PANEL_WIDTH, Consts.PLAYER_PANEL_HEIGHT,
@@ -404,6 +413,14 @@ namespace WordBattle
                     PlayerGameControllerOnline.Connect();
 
                     int myTurn = PlayerGameControllerOnline.Turn;
+                    mapId = PlayerGameControllerOnline.MapId;
+                    gridMap.Load(Content.Load<GridData>(Utils.GetMapFileName(mapId.ToString())));
+
+                    gridMap.IntializeNewMap();
+                    tilingGrid.Load(
+                        Consts.GRID_LEFT, Consts.GRID_TOP,
+                        Consts.TILE_WIDTH, Consts.TILE_HEIGHT);
+
                     if (myTurn == 0)
                     {
                         p1 = new PlayerEntity(
